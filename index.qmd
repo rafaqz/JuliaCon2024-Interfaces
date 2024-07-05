@@ -1,0 +1,192 @@
+---
+title: "Interfaces in Julia"
+subtitle: ""
+author:
+  - name: Rafael Schouten
+    orcid: 
+    email: rafaelschouten@gmail.com
+    affiliation: 
+      - name: Globe Intstitute, Copenhagen University
+      - department: Section for Biodiversity
+  - name: Guillaume Dalle
+    orcid: 0000-0003-4866-1687
+    email: guillaume.dalle@epfl.ch
+    affiliation: 
+      - name: EPFL
+      - department: IdePHICS, INDY & SPOC laboratories
+date: "2024-07-11"
+# bibliography: AutoDiff.bib
+engine: julia
+format:
+  revealjs:
+    incremental: true
+    toc: true
+    toc-depth: 1
+    slide-number: true
+    overview: true
+    code-line-numbers: false
+execute:
+    echo: true
+---
+
+# Motivation
+
+- Julia has no formal interfaces
+- [a serious complaint about this from a long term julia contributor](https://yuri.is/not-julia/)
+- What can we do to address these concerns? 
+- What is possible in a package? 
+
+# What we mean by an “interface”
+
+- objects must define a specific set of methods 
+- methods should behave as specified by their function documentation
+
+## Interfaces have *compile-time* and *run-time* properties
+
+- Compile time: 
+  - is a method defined at all?
+  - Does it accept arguments of the allowed types?
+- Run-time: 
+  - does the method do what the interface states it does?
+- Example: 
+  - at compile time check `size` returns a Tuple of `Int`
+  - at runtime check `prod(size(x)) == length(x)`
+
+## Proof
+
+- Developers need ways to know we have correctly implemented an interface
+- Other packages need to know what objects implement which interfaces
+- Options:
+  - Socially mediated trust (not strict enough - its not working)
+  - Technical proof (difficult, maybe impossible in julia)
+  - Compromise: 
+    - technical proof for a limited subset of types during tests
+    - traits state an interface works but rely on the tests being run somewhere else
+    - traits _could_ be tested during precompilation so the proof is hard-coded
+
+## Optional components 
+
+- Most reasonably complex interfaces in julia end up with optional components
+- [oxinabox julia issue](https://github.com/JuliaLang/julia/issues/34677)
+- For AbstractArray, `setindex!` is not implemented for some StaticaArrays.jl objects: setindex! Is an optional component of the AbstractArray interface.
+
+# Interfaces.jl approach
+
+- There are probably very smart ways to do interfaces (Kenos package)
+- But what is the simplest way?
+  - Compile-time traits linked to a list of run-time checks
+  - Component-based: some mandatory, some optional
+  - Tests are loosly typed functions linked to named components
+  - Traits are linked to the same named components
+
+---
+
+## Define mandatory components:
+\
+```{julia}
+global mandatory = (;
+    isempty = "defines `isempty` and testdata is not empty" => !isempty,
+    eltype = "elements eltype of set `s` are subtypes of `eltype(s)`" => 
+      s -> typeof(first(iterate(s))) <: eltype(s),
+    length = "set defines length and test object has length larger than zero" => 
+      s -> length(s) isa Int && length(s) > 0,
+    # iteration = "follows the IterationInterface" => 
+    #   s -> Interfaces.test(IterationInterface, s; show=false),
+    in = "`in` is true for elements in set" => 
+      s -> all(x -> in(x, s), s),
+);
+```
+
+---
+
+## And optional components:
+\
+```{julia}
+global optional = (;
+    copy = "creates an identical object with the same values, that is not the same object" => 
+        s -> (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),
+    empty = (
+        "returns an empty set able to hold elements of type U" => 
+            s -> (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),
+    ),
+    intersect = (
+        "`intersect` of set with itself is itself" => s -> intersect(s, s) == s,
+        "`intersect` of set with an empty set is an empty set" => s -> intersect(s, empty(s)) == empty(s),
+    ),
+    # ...
+);
+```
+
+## Declare the interface 
+\
+\
+Using the `@interface` macro:
+
+```{julia}
+using Interfaces
+@interface SetInterface AbstractSet (; mandatory, optional) "The `AbstractSet` interface"
+#          ^            ^           ^                       ^
+#          interface    supertype   test components         description
+```
+
+## Declare an implementation
+\
+\
+Using the `@implements` macro:
+
+```{julia}
+@implements SetInterface{(:copy,:empty,:intersect)} Set  [Set((1, 2))]
+#           ^                                              ^    ^
+#           interface with options                         type test data
+```
+
+## Check the implementation
+\
+\
+Using the `test` method:
+```{julia}
+Interfaces.test(SetInterface, Set)
+```
+
+## Check an implementation trait 
+\
+\
+Using the `implements` method:
+```{julia}
+Interfaces.implements(SetInterface, Set)
+```
+
+## Case study: Graphs ecosystem
+
+- A handful of methods to implement `AbstractGraph`
+- Some mandatory (`vertices`, `edges`), some optional (`add_vertex!`, `add_edge!`)
+- Most properties of interest are not checkable at compile time: for a given graph, are accessors coherent with one another?
+- Does `has_edge(g, u, v)` return true on every element of `edges(g)`?
+- Package GraphsInterfaceChecker.jl to verify these properties for existing and new formats.
+
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+Forward mode
+
+- ForwardDiff
+- Enzyme
+:::
+
+::: {.column width="50%"}
+Reverse mode
+
+- Zygote
+- Enzyme
+:::
+
+::: {.nonincremental}
+
+- Eat spaghetti
+- Drink wine
+
+:::
+
+::::
