@@ -25,6 +25,7 @@ format:
     slide-number: true
     overview: true
     code-line-numbers: false
+    theme: [serif] # beige blood dark default league moon night serif simple sky solarized
 execute:
     echo: true
 ---
@@ -32,9 +33,13 @@ execute:
 # Motivation
 
 - Julia has no formal interfaces
-- [a serious complaint about this from a long term julia contributor](https://yuri.is/not-julia/)
-- What can we do to address these concerns? 
-- What is possible in a package? 
+- People have complained about this
+
+---
+
+<iframe src="https://yuri.is/not-julia/" style="width: 100%; aspect-ratio: 1.2;"></iframe>
+
+--- 
 
 # What we mean by an “interface”
 
@@ -49,39 +54,19 @@ execute:
 - Run-time: 
   - does the method do what the interface states it does?
 - Example: 
-  - at compile time check `size` returns a Tuple of `Int`
-  - at runtime check `prod(size(x)) == length(x)`
+  - at compile-time check `size` returns a Tuple of `Int`
+  - at run-time check `prod(size(x)) == length(x)`
 
-## Proof
-
-- Developers need ways to know we have correctly implemented an interface
-- Other packages need to know what objects implement which interfaces
-- Options:
-  - Socially mediated trust (not strict enough - its not working)
-  - Technical proof (difficult, maybe impossible in julia)
-  - Compromise: 
-    - technical proof for a limited subset of types during tests
-    - traits state an interface works but rely on the tests being run somewhere else
-    - traits _could_ be tested during precompilation so the proof is hard-coded
-
-## Optional components 
+## Interfaces have optional components 
 
 - Most reasonably complex interfaces in julia end up with optional components
-- [oxinabox julia issue](https://github.com/JuliaLang/julia/issues/34677)
-- For AbstractArray, `setindex!` is not implemented for some StaticaArrays.jl objects: setindex! Is an optional component of the AbstractArray interface.
+- `setindex!` is not implemented for some StaticaArrays.jl array types
+- [oxinabox AbstractSet issue]('https://github.com/JuliaLang/julia/issues/34677')
 
 # Interfaces.jl approach
 
-- There are probably very smart ways to do interfaces (Kenos package)
-- But what is the simplest way?
-  - Compile-time traits linked to a list of run-time checks
-  - Component-based: some mandatory, some optional
-  - Tests are loosly typed functions linked to named components
-  - Traits are linked to the same named components
-
----
-
 ## Define mandatory components:
+
 \
 ```{julia}
 global mandatory = (;
@@ -117,7 +102,7 @@ global optional = (;
 );
 ```
 
-## Declare the interface 
+## Define the interface 
 \
 \
 Using the `@interface` macro:
@@ -135,9 +120,9 @@ using Interfaces
 Using the `@implements` macro:
 
 ```{julia}
-@implements SetInterface{(:copy,:empty,:intersect)} Set  [Set((1, 2))]
-#           ^                                              ^    ^
-#           interface with options                         type test data
+@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2))]
+#           ^                                       ^    ^
+#           interface with options       type test data
 ```
 
 ## Check the implementation
@@ -148,12 +133,36 @@ Using the `test` method:
 Interfaces.test(SetInterface, Set)
 ```
 
+## Check all the implementations
+\
+\
+```{julia}
+Interfaces.test(SetInterface)
+```
+
 ## Check an implementation trait 
 \
 \
 Using the `implements` method:
+\
 ```{julia}
 Interfaces.implements(SetInterface, Set)
+```
+\
+```{julia}
+Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
+```
+\
+```{julia}
+Interfaces.implements(SetInterface{:intersect}, Set)
+```
+---
+
+This has no runtime cost:
+
+```{julia}
+using BenchmarkTools
+@btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
 
 ## Case study: Graphs ecosystem
@@ -163,30 +172,3 @@ Interfaces.implements(SetInterface, Set)
 - Most properties of interest are not checkable at compile time: for a given graph, are accessors coherent with one another?
 - Does `has_edge(g, u, v)` return true on every element of `edges(g)`?
 - Package GraphsInterfaceChecker.jl to verify these properties for existing and new formats.
-
-
-
-:::: {.columns}
-
-::: {.column width="50%"}
-Forward mode
-
-- ForwardDiff
-- Enzyme
-:::
-
-::: {.column width="50%"}
-Reverse mode
-
-- Zygote
-- Enzyme
-:::
-
-::: {.nonincremental}
-
-- Eat spaghetti
-- Drink wine
-
-:::
-
-::::
