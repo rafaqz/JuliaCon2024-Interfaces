@@ -30,71 +30,78 @@
   {
     "objectID": "index.html#interfaces-have-compile-time-and-run-time-properties",
     "href": "index.html#interfaces-have-compile-time-and-run-time-properties",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Interfaces have compile-time and run-time properties",
     "text": "Interfaces have compile-time and run-time properties\n\nCompile time:\n\nis a method defined at all?\nDoes it accept arguments of the allowed types?\n\nRun-time:\n\ndoes the method do what the interface states it does?\n\nExample:\n\nat compile-time check size returns a Tuple of Int\nat run-time check prod(size(x)) == length(x)"
   },
   {
     "objectID": "index.html#interfaces-have-optional-components",
     "href": "index.html#interfaces-have-optional-components",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Interfaces have optional components",
     "text": "Interfaces have optional components\n\nMost reasonably complex interfaces in julia end up with optional components\nsetindex! is not implemented for some StaticArrays.jl array types\noxinabox AbstractSet issue"
   },
   {
     "objectID": "index.html#define-mandatory-components",
     "href": "index.html#define-mandatory-components",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Define mandatory components:",
-    "text": "Define mandatory components:\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    # iteration = \"follows the IterationInterface\" =&gt; \n    #   s -&gt; Interfaces.test(IterationInterface, s; show=false),\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; in(x, s), s),\n);"
+    "text": "Define mandatory components:\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; in(x, s), s),\n);"
   },
   {
     "objectID": "index.html#and-optional-components",
     "href": "index.html#and-optional-components",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "And optional components:",
     "text": "And optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
   },
   {
     "objectID": "index.html#define-the-interface",
     "href": "index.html#define-the-interface",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Define the interface",
-    "text": "Define the interface\n\n\nUsing the @interface macro:\n\nusing Interfaces\n@interface SetInterface AbstractSet (; mandatory, optional) \"The `AbstractSet` interface\"\n#          ^            ^           ^                       ^\n#          interface    supertype   test components         description\n\nMain.Notebook.SetInterface"
+    "text": "Define the interface\n\n\nUsing the @interface macro:\n\nusing Interfaces\n@interface SetInterface AbstractSet (; mandatory, optional) \"Defines AbstractSet behavior\"\n#          ^            ^           ^                       ^\n#          interface    supertype   test components         description\n\nMain.Notebook.SetInterface"
   },
   {
     "objectID": "index.html#declare-an-implementation",
     "href": "index.html#declare-an-implementation",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Declare an implementation",
-    "text": "Declare an implementation\n\n\nUsing the @implements macro:\n\n@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2))]\n#           ^                                       ^    ^\n#           interface with options       type test data"
+    "text": "Declare an implementation\n\n\nUsing the @implements macro:\n\n@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2)), Set((:a, :b))]\n#           ^                            ^    ^\n#           interface with options       type test data"
   },
   {
     "objectID": "index.html#check-the-implementation",
     "href": "index.html#check-the-implementation",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Check the implementation",
-    "text": "Check the implementation\n\n\nUsing the test method:\n\nInterfaces.test(SetInterface, Set)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true]\nlength: set defines length and test object has length larger than zero [true]\nin: `in` is true for elements in set [true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true]\nempty: (returns an empty set able to hold elements of type U [true])\n\n\ntrue"
+    "text": "Check the implementation\nUsing the test method:\n\nInterfaces.test(SetInterface, Set)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\n\ntrue"
   },
   {
     "objectID": "index.html#check-all-the-implementations",
     "href": "index.html#check-all-the-implementations",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Check all the implementations",
-    "text": "Check all the implementations\n\n\n\n\nInterfaces.test(SetInterface)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true]\nlength: set defines length and test object has length larger than zero [true]\nin: `in` is true for elements in set [true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true]\nempty: (returns an empty set able to hold elements of type U [true])\n\nImplementation summary:\n  Set correctly implements SetInterface: true\n\n\ntrue"
+    "text": "Check all the implementations\n\nInterfaces.test(SetInterface)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\nImplementation summary:\n  Set correctly implements SetInterface: true\n\n\ntrue"
   },
   {
     "objectID": "index.html#check-an-implementation-trait",
     "href": "index.html#check-an-implementation-trait",
-    "title": "Interfaces in Julia",
+    "title": "Interfaces.jl",
     "section": "Check an implementation trait",
-    "text": "Check an implementation trait\n\n\nUsing the implements method:\n\n\nInterfaces.implements(SetInterface, Set)\n\ntrue\n\n\n\n\n\nInterfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\ntrue\n\n\n\n\n\nInterfaces.implements(SetInterface{:intersect}, Set)\n\nfalse"
+    "text": "Check an implementation trait\n\nUsing the implements method:\n\n\nInterfaces.implements(SetInterface, Set)\n\ntrue\n\n\n\n\n\nInterfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\ntrue\n\n\n\n\n\nInterfaces.implements(SetInterface{:intersect}, Set)\n\nfalse"
   },
   {
-    "objectID": "index.html#case-study-graphs-ecosystem",
-    "href": "index.html#case-study-graphs-ecosystem",
-    "title": "Interfaces in Julia",
-    "section": "Case study: Graphs ecosystem",
-    "text": "Case study: Graphs ecosystem\n\nA handful of methods to implement AbstractGraph\nSome mandatory (vertices, edges), some optional (add_vertex!, add_edge!)\nMost properties of interest are not checkable at compile time: for a given graph, are accessors coherent with one another?\nDoes has_edge(g, u, v) return true on every element of edges(g)?\nPackage GraphsInterfaceChecker.jl to verify these properties for existing and new formats."
+    "objectID": "index.html#check-help",
+    "href": "index.html#check-help",
+    "title": "Interfaces.jl",
+    "section": "Check help",
+    "text": "Check help\n\n\nhelp?&gt; SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  ──────────────────────────────────────────────────────────────────────────────────────────────────\n\nExtended help is available with `??`"
+  },
+  {
+    "objectID": "index.html#check-extended-help",
+    "href": "index.html#check-extended-help",
+    "title": "Interfaces.jl",
+    "section": "Check extended help",
+    "text": "Check extended help\n\n\nhelp?&gt; ?SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  Extended help\n  ≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n  Mandatory keys:\n  ===============\n\n    •  isempty: defines isempty and testdata is not empty\n\n    •  eltype: elements eltype of set s are subtypes of eltype(s)\n\n    •  length: set defines length and test object has length larger than zero\n\n    •  in: in is true for elements in set\n\n  Optional keys:\n  ==============\n\n    •  copy: creates an identical object with the same values, that is not the same object\n\n    •  empty:\n       • returns an empty set able to hold elements of type U\n\n    •  intersect:\n       • intersect of set with itself is itself\n       • intersect of set with an empty set is an empty set"
   }
 ]

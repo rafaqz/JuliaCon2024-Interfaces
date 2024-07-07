@@ -13,7 +13,7 @@
   <meta name="author" content="Rafael Schouten">
   <meta name="author" content="Guillaume Dalle">
   <meta name="dcterms.date" content="2024-07-11">
-  <title>Interfaces in Julia</title>
+  <title>Interfaces.jl</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -393,7 +393,8 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Interfaces in Julia</h1>
+  <h1 class="title">Interfaces.jl</h1>
+  <p class="subtitle">interface tests for your objects</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -434,6 +435,7 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <li class="fragment"><a href="#/motivation" id="/toc-motivation">Motivation</a></li>
 <li class="fragment"><a href="#/what-is-an-interface" id="/toc-what-is-an-interface">What is an “interface”</a></li>
 <li class="fragment"><a href="#/interfaces.jl-approach" id="/toc-interfaces.jl-approach">Interfaces.jl approach</a></li>
+<li class="fragment"><a href="#/case-study-graphs-ecosystem" id="/toc-case-study-graphs-ecosystem">Case study: Graphs ecosystem</a></li>
 </ul>
 </nav>
 </section>
@@ -504,11 +506,9 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">typeof</span>(<span class="fu">first</span>(<span class="fu">iterate</span>(s))) <span class="op">&lt;:</span><span class="dt"> eltype</span>(s),</span>
 <span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="st">"set defines length and test object has length larger than zero"</span> <span class="op">=&gt;</span> </span>
 <span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">length</span>(s) isa <span class="dt">Int</span> <span class="op">&amp;&amp;</span> <span class="fu">length</span>(s) <span class="op">&gt;</span> <span class="fl">0</span>,</span>
-<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># iteration = "follows the IterationInterface" =&gt; </span></span>
-<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">#   s -&gt; Interfaces.test(IterationInterface, s; show=false),</span></span>
-<span id="cb1-9"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for elements in set"</span> <span class="op">=&gt;</span> </span>
-<span id="cb1-10"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">all</span>(x <span class="op">-&gt;</span> <span class="fu">in</span>(x, s), s),</span>
-<span id="cb1-11"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for elements in set"</span> <span class="op">=&gt;</span> </span>
+<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">all</span>(x <span class="op">-&gt;</span> <span class="fu">in</span>(x, s), s),</span>
+<span id="cb1-9"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="and-optional-components" class="slide level2">
@@ -538,7 +538,7 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 Using the <code>@interface</code> macro:</p>
 <div id="8" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Interfaces</span></span>
-<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> (; mandatory, optional) <span class="st">"The `AbstractSet` interface"</span></span>
+<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> (; mandatory, optional) <span class="st">"Defines AbstractSet behavior"</span></span>
 <span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          ^            ^           ^                       ^</span></span>
 <span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          interface    supertype   test components         description</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
@@ -552,16 +552,14 @@ Using the <code>@interface</code> macro:</p>
 <br>
 Using the <code>@implements</code> macro:</p>
 <div id="10" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@implements</span> SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)} <span class="dt">Set</span>  [<span class="fu">Set</span>((<span class="fl">1</span>, <span class="fl">2</span>))]</span>
-<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           ^                                       ^    ^</span></span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@implements</span> SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)} <span class="dt">Set</span>  [<span class="fu">Set</span>((<span class="fl">1</span>, <span class="fl">2</span>)), <span class="fu">Set</span>((<span class="op">:</span>a, <span class="op">:</span>b))]</span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           ^                            ^    ^</span></span>
 <span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           interface with options       type test data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="check-the-implementation" class="slide level2">
 <h2>Check the implementation</h2>
-<p><br>
-<br>
-Using the <code>test</code> method:</p>
+<p>Using the <code>test</code> method:</p>
 <div id="12" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -569,14 +567,14 @@ Using the <code>test</code> method:</p>
 Testing SetInterface is implemented for Set
 
 Mandatory components
-isempty: defines `isempty` and testdata is not empty [true]
-eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true]
-length: set defines length and test object has length larger than zero [true]
-in: `in` is true for elements in set [true]
+isempty: defines `isempty` and testdata is not empty [true, true]
+eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]
+length: set defines length and test object has length larger than zero [true, true]
+in: `in` is true for elements in set [true, true]
 
 Optional components
-copy: creates an identical object with the same values, that is not the same object [true]
-empty: (returns an empty set able to hold elements of type U [true])</code></pre>
+copy: creates an identical object with the same values, that is not the same object [true, true]
+empty: (returns an empty set able to hold elements of type U [true, true])</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>true</code></pre>
@@ -585,9 +583,6 @@ empty: (returns an empty set able to hold elements of type U [true])</code></pre
 </section>
 <section id="check-all-the-implementations" class="slide level2">
 <h2>Check all the implementations</h2>
-<p><br>
-<br>
-</p>
 <div id="14" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -595,14 +590,14 @@ empty: (returns an empty set able to hold elements of type U [true])</code></pre
 Testing SetInterface is implemented for Set
 
 Mandatory components
-isempty: defines `isempty` and testdata is not empty [true]
-eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true]
-length: set defines length and test object has length larger than zero [true]
-in: `in` is true for elements in set [true]
+isempty: defines `isempty` and testdata is not empty [true, true]
+eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]
+length: set defines length and test object has length larger than zero [true, true]
+in: `in` is true for elements in set [true, true]
 
 Optional components
-copy: creates an identical object with the same values, that is not the same object [true]
-empty: (returns an empty set able to hold elements of type U [true])
+copy: creates an identical object with the same values, that is not the same object [true, true]
+empty: (returns an empty set able to hold elements of type U [true, true])
 
 Implementation summary:
   Set correctly implements SetInterface: true</code></pre>
@@ -615,7 +610,6 @@ Implementation summary:
 <section id="check-an-implementation-trait" class="slide level2">
 <h2>Check an implementation trait</h2>
 <p><br>
-<br>
 Using the <code>implements</code> method:<br>
 </p>
 <div id="16" class="cell" data-execution_count="1">
@@ -655,8 +649,66 @@ Using the <code>implements</code> method:<br>
 </div>
 </div>
 </section>
-<section id="case-study-graphs-ecosystem" class="slide level2">
-<h2>Case study: Graphs ecosystem</h2>
+<section id="check-help" class="slide level2">
+<h2>Check help</h2>
+<p><br>
+</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb21-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> SetInterface</span>
+<span id="cb21-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
+<span id="cb21-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
+<span id="cb21-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
+<span id="cb21-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
+<span id="cb21-8"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
+<span id="cb21-10"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a aria-hidden="true" tabindex="-1"></a>  ──────────────────────────────────────────────────────────────────────────────────────────────────</span>
+<span id="cb21-12"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a aria-hidden="true" tabindex="-1"></a>Extended help is available with <span class="ss">`??`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="check-extended-help" class="slide level2">
+<h2>Check extended help</h2>
+<p><br>
+</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb22-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> ?SetInterface</span>
+<span id="cb22-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
+<span id="cb22-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
+<span id="cb22-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
+<span id="cb22-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
+<span id="cb22-8"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
+<span id="cb22-10"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a aria-hidden="true" tabindex="-1"></a>  Extended help</span>
+<span id="cb22-12"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">≡≡≡≡≡≡≡≡≡≡≡≡≡</span></span>
+<span id="cb22-13"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a aria-hidden="true" tabindex="-1"></a>  Mandatory keys<span class="op">:</span></span>
+<span id="cb22-15"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">===============</span></span>
+<span id="cb22-16"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a aria-hidden="true" tabindex="-1"></a>    •  isempty<span class="op">:</span> defines isempty and testdata is not empty</span>
+<span id="cb22-18"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a aria-hidden="true" tabindex="-1"></a>    •  eltype<span class="op">:</span> elements eltype of set s are subtypes of <span class="fu">eltype</span>(s)</span>
+<span id="cb22-20"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a aria-hidden="true" tabindex="-1"></a>    •  length<span class="op">:</span> set defines length and test object has length larger than zero</span>
+<span id="cb22-22"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a aria-hidden="true" tabindex="-1"></a>    •  <span class="kw">in</span><span class="op">:</span> <span class="kw">in</span> is <span class="cn">true</span> <span class="cf">for</span> elements <span class="kw">in</span> set</span>
+<span id="cb22-24"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a aria-hidden="true" tabindex="-1"></a>  Optional keys<span class="op">:</span></span>
+<span id="cb22-26"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">==============</span></span>
+<span id="cb22-27"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a aria-hidden="true" tabindex="-1"></a>    •  copy<span class="op">:</span> creates an identical object with the same values, that is not the same object</span>
+<span id="cb22-29"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-30"><a aria-hidden="true" tabindex="-1"></a>    •  empty<span class="op">:</span></span>
+<span id="cb22-31"><a aria-hidden="true" tabindex="-1"></a>       • returns an empty set able to hold elements of <span class="kw">type</span> U</span>
+<span id="cb22-32"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-33"><a aria-hidden="true" tabindex="-1"></a>    •  intersect<span class="op">:</span></span>
+<span id="cb22-34"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with itself is itself</span>
+<span id="cb22-35"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with an empty set is an empty set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section></section>
+<section id="case-study-graphs-ecosystem" class="title-slide slide level1 center">
+<h1>Case study: Graphs ecosystem</h1>
 <ul>
 <li class="fragment">A handful of methods to implement <code>AbstractGraph</code></li>
 <li class="fragment">Some mandatory (<code>vertices</code>, <code>edges</code>), some optional (<code>add_vertex!</code>, <code>add_edge!</code>)</li>
@@ -670,7 +722,7 @@ Using the <code>implements</code> method:<br>
 
 </div>
 </div>
-</section></section>
+</section>
     </div>
   </div>
 
