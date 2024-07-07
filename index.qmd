@@ -1,6 +1,6 @@
 ---
-title: "Interfaces in Julia"
-subtitle: ""
+title: "Interfaces.jl"
+subtitle: "interface tests for your objects"
 author:
   - name: Rafael Schouten
     orcid: 
@@ -82,8 +82,6 @@ mandatory = (;
       s -> typeof(first(iterate(s))) <: eltype(s),
     length = "set defines length and test object has length larger than zero" => 
       s -> length(s) isa Int && length(s) > 0,
-    # iteration = "follows the IterationInterface" => 
-    #   s -> Interfaces.test(IterationInterface, s; show=false),
     in = "`in` is true for elements in set" => 
       s -> all(x -> in(x, s), s),
 );
@@ -116,7 +114,7 @@ Using the `@interface` macro:
 
 ```{julia}
 using Interfaces
-@interface SetInterface AbstractSet (; mandatory, optional) "The `AbstractSet` interface"
+@interface SetInterface AbstractSet (; mandatory, optional) "Defines AbstractSet behavior"
 #          ^            ^           ^                       ^
 #          interface    supertype   test components         description
 ```
@@ -127,28 +125,23 @@ using Interfaces
 Using the `@implements` macro:
 
 ```{julia}
-@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2))]
-#           ^                                       ^    ^
+@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2)), Set((:a, :b))]
+#           ^                            ^    ^
 #           interface with options       type test data
 ```
 
 ## Check the implementation
-\
-\
 Using the `test` method:
 ```{julia}
 Interfaces.test(SetInterface, Set)
 ```
 
 ## Check all the implementations
-\
-\
 ```{julia}
 Interfaces.test(SetInterface)
 ```
 
 ## Check an implementation trait 
-\
 \
 Using the `implements` method:
 \
@@ -171,7 +164,65 @@ This has no runtime cost:
 @btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
 
-## Case study: Graphs ecosystem
+## Check help
+\
+```julia
+help?> SetInterface
+search: SetInterface
+
+      SetInterface
+
+  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and
+  optional components (:copy, :empty, :intersect).
+
+  Defines AbstractSet behavior
+
+  ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+Extended help is available with `??`
+```
+
+## Check extended help
+\
+```julia
+help?> ?SetInterface
+search: SetInterface
+
+      SetInterface
+
+  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and
+  optional components (:copy, :empty, :intersect).
+
+  Defines AbstractSet behavior
+
+  Extended help
+  ≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+  Mandatory keys:
+  ===============
+
+    •  isempty: defines isempty and testdata is not empty
+
+    •  eltype: elements eltype of set s are subtypes of eltype(s)
+
+    •  length: set defines length and test object has length larger than zero
+
+    •  in: in is true for elements in set
+
+  Optional keys:
+  ==============
+
+    •  copy: creates an identical object with the same values, that is not the same object
+
+    •  empty:
+       • returns an empty set able to hold elements of type U
+
+    •  intersect:
+       • intersect of set with itself is itself
+       • intersect of set with an empty set is an empty set
+```
+
+# Case study: Graphs ecosystem
 
 - A handful of methods to implement `AbstractGraph`
 - Some mandatory (`vertices`, `edges`), some optional (`add_vertex!`, `add_edge!`)
