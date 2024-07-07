@@ -1,8 +1,8 @@
-# JuliaCon 2024 - AutoDiff talk
+# JuliaCon 2024 - Interfaces talk
 
-[![Slides badge](https://img.shields.io/badge/preview-slides-blue)](https://gdalle.github.io/JuliaCon2024-AutoDiff/)
+[![Slides badge](https://img.shields.io/badge/preview-slides-blue)](https://rafaqz.github.io/JuliaCon2024-Interfaces/)
 
-Slides for the talk [*Gradients for everyone: a quick guide to autodiff in Julia*](https://pretalx.com/juliacon2024/talk/YGZYWK/) at [JuliaCon 2024](https://juliacon.org/2024/).
+Slides for the talk [*Interfaces.jl: base and package interface tests for your objects*](https://pretalx.com/juliacon2024/talk/GXWLAW/) at [JuliaCon 2024](https://juliacon.org/2024/).
 
 ## Quarto setup
 
