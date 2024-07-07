@@ -25,7 +25,7 @@ format:
     slide-number: true
     overview: true
     code-line-numbers: false
-    theme: [serif] # beige blood dark default league moon night serif simple sky solarized
+    theme: [night] # beige blood dark default league moon night serif simple sky solarized
 execute:
     echo: true
 ---
@@ -37,11 +37,10 @@ execute:
 
 ---
 
-<iframe src="https://yuri.is/not-julia/" style="width: 100%; aspect-ratio: 1.2;"></iframe>
-
+<iframe src="https://yuri.is/not-julia/" style="background-color: white; width: 100%; aspect-ratio: 1.2;"></iframe>
 --- 
 
-# What we mean by an “interface”
+# What is an “interface”
 
 - objects must define a specific set of methods 
 - methods should behave as specified by their function documentation
@@ -60,16 +59,24 @@ execute:
 ## Interfaces have optional components 
 
 - Most reasonably complex interfaces in julia end up with optional components
-- `setindex!` is not implemented for some StaticaArrays.jl array types
+- `setindex!` is not implemented for some StaticArrays.jl array types
 - [oxinabox AbstractSet issue]('https://github.com/JuliaLang/julia/issues/34677')
 
 # Interfaces.jl approach
 
 ## Define mandatory components:
 
+```{julia}
+#| echo: false
+# Not sure why we need this
+global mandatory
+global optional
+using BenchmarkTools
+```
+
 \
 ```{julia}
-global mandatory = (;
+mandatory = (;
     isempty = "defines `isempty` and testdata is not empty" => !isempty,
     eltype = "elements eltype of set `s` are subtypes of `eltype(s)`" => 
       s -> typeof(first(iterate(s))) <: eltype(s),
@@ -87,7 +94,7 @@ global mandatory = (;
 ## And optional components:
 \
 ```{julia}
-global optional = (;
+optional = (;
     copy = "creates an identical object with the same values, that is not the same object" => 
         s -> (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),
     empty = (
@@ -159,9 +166,8 @@ Interfaces.implements(SetInterface{:intersect}, Set)
 ---
 
 This has no runtime cost:
-
+\
 ```{julia}
-using BenchmarkTools
 @btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
 
