@@ -49,11 +49,11 @@
     "text": "Define mandatory components:\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; in(x, s), s),\n);"
   },
   {
-    "objectID": "index.html#and-optional-components",
-    "href": "index.html#and-optional-components",
+    "objectID": "index.html#define-optional-components",
+    "href": "index.html#define-optional-components",
     "title": "Interfaces.jl",
-    "section": "And optional components:",
-    "text": "And optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
+    "section": "Define optional components:",
+    "text": "Define optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
   },
   {
     "objectID": "index.html#define-the-interface",
@@ -70,18 +70,18 @@
     "text": "Declare an implementation\n\n\nUsing the @implements macro:\n\n@implements SetInterface{(:copy,:empty)} Set  [Set((1, 2)), Set((:a, :b))]\n#           ^                            ^    ^\n#           interface with options       type test data"
   },
   {
-    "objectID": "index.html#check-the-implementation",
-    "href": "index.html#check-the-implementation",
+    "objectID": "index.html#test-the-implementation",
+    "href": "index.html#test-the-implementation",
     "title": "Interfaces.jl",
-    "section": "Check the implementation",
-    "text": "Check the implementation\nUsing the test method:\n\nInterfaces.test(SetInterface, Set)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\n\ntrue"
+    "section": "Test the implementation",
+    "text": "Test the implementation\nUsing the test method:\n\nInterfaces.test(SetInterface, Set)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\n\ntrue"
   },
   {
-    "objectID": "index.html#check-all-the-implementations",
-    "href": "index.html#check-all-the-implementations",
+    "objectID": "index.html#test-all-the-implementations",
+    "href": "index.html#test-all-the-implementations",
     "title": "Interfaces.jl",
-    "section": "Check all the implementations",
-    "text": "Check all the implementations\n\nInterfaces.test(SetInterface)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\nImplementation summary:\n  Set correctly implements SetInterface: true\n\n\ntrue"
+    "section": "Test all the implementations",
+    "text": "Test all the implementations\n\nInterfaces.test(SetInterface)\n\n\nTesting SetInterface is implemented for Set\n\nMandatory components\nisempty: defines `isempty` and testdata is not empty [true, true]\neltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]\nlength: set defines length and test object has length larger than zero [true, true]\nin: `in` is true for elements in set [true, true]\n\nOptional components\ncopy: creates an identical object with the same values, that is not the same object [true, true]\nempty: (returns an empty set able to hold elements of type U [true, true])\n\nImplementation summary:\n  Set correctly implements SetInterface: true\n\n\ntrue"
   },
   {
     "objectID": "index.html#check-an-implementation-trait",
