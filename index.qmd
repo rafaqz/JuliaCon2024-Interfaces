@@ -89,7 +89,7 @@ mandatory = (;
 
 ---
 
-## And optional components:
+## Define optional components:
 \
 ```{julia}
 optional = (;
@@ -130,13 +130,13 @@ Using the `@implements` macro:
 #           interface with options       type test data
 ```
 
-## Check the implementation
+## Test the implementation
 Using the `test` method:
 ```{julia}
 Interfaces.test(SetInterface, Set)
 ```
 
-## Check all the implementations
+## Test all the implementations
 ```{julia}
 Interfaces.test(SetInterface)
 ```
