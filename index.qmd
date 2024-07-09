@@ -20,7 +20,7 @@ engine: julia
 format:
   revealjs:
     incremental: true
-    toc: true
+    toc: false
     toc-depth: 1
     slide-number: true
     overview: true
@@ -42,8 +42,8 @@ execute:
 
 # What is an “interface”
 
-- objects must define a specific set of methods 
-- methods should behave as specified by their function documentation
+- objects must accepted in a specific set of methods 
+- methods should behave as the function documentation specifies
 
 ## Interfaces have *compile-time* and *run-time* properties
 
@@ -58,7 +58,6 @@ execute:
 
 ## Interfaces have optional components 
 
-- Most reasonably complex interfaces in julia end up with optional components
 - `setindex!` is not implemented for some StaticArrays.jl array types
 - [oxinabox AbstractSet issue]('https://github.com/JuliaLang/julia/issues/34677')
 
@@ -73,7 +72,9 @@ global mandatory
 global optional
 using BenchmarkTools
 ```
-
+\
+Format: `component = "label" => test_func`
+\
 \
 ```{julia}
 mandatory = (;
@@ -99,6 +100,7 @@ optional = (;
         "returns an empty set able to hold elements of type U" => 
             s -> (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),
     ),
+    # Components can be a tuple of tests
     intersect = (
         "`intersect` of set with itself is itself" => s -> intersect(s, s) == s,
         "`intersect` of set with an empty set is an empty set" => s -> intersect(s, empty(s)) == empty(s),
