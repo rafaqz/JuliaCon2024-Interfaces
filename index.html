@@ -8,7 +8,7 @@
 <link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.5.53">
+  <meta name="generator" content="quarto-1.5.54">
 
   <meta name="author" content="Rafael Schouten">
   <meta name="author" content="Guillaume Dalle">
@@ -428,16 +428,6 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 </div>
 
   <p class="date">2024-07-11</p>
-</section><section id="TOC">
-<nav role="doc-toc"> 
-<h2 id="toc-title">Table of contents</h2>
-<ul>
-<li class="fragment"><a href="#/motivation" id="/toc-motivation">Motivation</a></li>
-<li class="fragment"><a href="#/what-is-an-interface" id="/toc-what-is-an-interface">What is an “interface”</a></li>
-<li class="fragment"><a href="#/interfaces.jl-approach" id="/toc-interfaces.jl-approach">Interfaces.jl approach</a></li>
-<li class="fragment"><a href="#/case-study-graphs-ecosystem" id="/toc-case-study-graphs-ecosystem">Case study: Graphs ecosystem</a></li>
-</ul>
-</nav>
 </section>
 <section>
 <section id="motivation" class="title-slide slide level1 center">
@@ -459,8 +449,8 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <section id="what-is-an-interface" class="title-slide slide level1 center">
 <h1>What is an “interface”</h1>
 <ul>
-<li class="fragment">objects must define a specific set of methods</li>
-<li class="fragment">methods should behave as specified by their function documentation</li>
+<li class="fragment">objects must accepted in a specific set of methods</li>
+<li class="fragment">methods should behave as the function documentation specifies</li>
 </ul>
 </section>
 <section id="interfaces-have-compile-time-and-run-time-properties" class="slide level2">
@@ -485,7 +475,6 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <section id="interfaces-have-optional-components" class="slide level2">
 <h2>Interfaces have optional components</h2>
 <ul>
-<li class="fragment">Most reasonably complex interfaces in julia end up with optional components</li>
 <li class="fragment"><code>setindex!</code> is not implemented for some StaticArrays.jl array types</li>
 <li class="fragment"><a href="'https://github.com/JuliaLang/julia/issues/34677'">oxinabox AbstractSet issue</a></li>
 </ul>
@@ -498,6 +487,8 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <section id="define-mandatory-components" class="slide level2">
 <h2>Define mandatory components:</h2>
 <p><br>
+Format: <code>component = "label" =&gt; test_func</code><br>
+<br>
 </p>
 <div id="4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a>mandatory <span class="op">=</span> (;</span>
@@ -523,12 +514,13 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <span id="cb2-5"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"returns an empty set able to hold elements of type U"</span> <span class="op">=&gt;</span> </span>
 <span id="cb2-6"><a aria-hidden="true" tabindex="-1"></a>            s <span class="op">-&gt;</span> (s1 <span class="op">=</span> <span class="bu">Base</span>.<span class="fu">empty</span>(s); <span class="fu">isempty</span>(s1) <span class="op">&amp;&amp;</span> <span class="fu">eltype</span>(s1) <span class="op">==</span> <span class="fu">eltype</span>(s)),</span>
 <span id="cb2-7"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-8"><a aria-hidden="true" tabindex="-1"></a>    intersect <span class="op">=</span> (</span>
-<span id="cb2-9"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with itself is itself"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, s) <span class="op">==</span> s,</span>
-<span id="cb2-10"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with an empty set is an empty set"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, <span class="fu">empty</span>(s)) <span class="op">==</span> <span class="fu">empty</span>(s),</span>
-<span id="cb2-11"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-12"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
-<span id="cb2-13"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># Components can be a tuple of tests</span></span>
+<span id="cb2-9"><a aria-hidden="true" tabindex="-1"></a>    intersect <span class="op">=</span> (</span>
+<span id="cb2-10"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with itself is itself"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, s) <span class="op">==</span> s,</span>
+<span id="cb2-11"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with an empty set is an empty set"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, <span class="fu">empty</span>(s)) <span class="op">==</span> <span class="fu">empty</span>(s),</span>
+<span id="cb2-12"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-13"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb2-14"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="define-the-interface" class="slide level2">

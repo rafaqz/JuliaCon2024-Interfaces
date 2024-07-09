@@ -39,21 +39,21 @@
     "href": "index.html#interfaces-have-optional-components",
     "title": "Interfaces.jl",
     "section": "Interfaces have optional components",
-    "text": "Interfaces have optional components\n\nMost reasonably complex interfaces in julia end up with optional components\nsetindex! is not implemented for some StaticArrays.jl array types\noxinabox AbstractSet issue"
+    "text": "Interfaces have optional components\n\nsetindex! is not implemented for some StaticArrays.jl array types\noxinabox AbstractSet issue"
   },
   {
     "objectID": "index.html#define-mandatory-components",
     "href": "index.html#define-mandatory-components",
     "title": "Interfaces.jl",
     "section": "Define mandatory components:",
-    "text": "Define mandatory components:\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; in(x, s), s),\n);"
+    "text": "Define mandatory components:\n\nFormat: component = \"label\" =&gt; test_func\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; in(x, s), s),\n);"
   },
   {
     "objectID": "index.html#define-optional-components",
     "href": "index.html#define-optional-components",
     "title": "Interfaces.jl",
     "section": "Define optional components:",
-    "text": "Define optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
+    "text": "Define optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    # Components can be a tuple of tests\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
   },
   {
     "objectID": "index.html#define-the-interface",
