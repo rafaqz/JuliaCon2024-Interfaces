@@ -6,7 +6,7 @@ author:
     orcid: 
     email: rafaelschouten@gmail.com
     affiliation: 
-      - name: Globe Intstitute, Copenhagen University
+      - name: Globe Institute, Copenhagen University
       - department: Section for Biodiversity
   - name: Guillaume Dalle
     orcid: 0000-0003-4866-1687
@@ -26,6 +26,7 @@ format:
     overview: true
     code-line-numbers: false
     theme: [night] # beige blood dark default league moon night serif simple sky solarized
+    fontsize: 28pt
 execute:
     echo: true
 ---
@@ -33,18 +34,25 @@ execute:
 # Motivation
 
 - Julia has no formal interfaces
-- People have complained about this
+- People have complained about this...
 
 ---
 
 <iframe src="https://yuri.is/not-julia/" style="background-color: white; width: 100%; aspect-ratio: 1.2;"></iframe>
 
-# What is an “interface”?
+--- 
 
-- Objects must accepted in a specific set of methods 
-- Methods should behave as the function documentation specifies
+\
+\
 
-## Interfaces have *compile-time* and *run-time* properties
+- What can we do about this?
+- Can we facilitate tested interfaces in a package?
+
+# Defining “interface” for Interfaces.jl
+- an interface consists of a set of functions with clear documented behaviour
+- it may or may not be tied to an abstract type (`AbstractArray` vs Tables.jl)
+- objects implenting the interace must be accepted by the interface functions
+- methods should behave as the function documentation specifies
 
 :::: {.columns}
 
@@ -69,14 +77,13 @@ execute:
 
 ## Interfaces have optional components 
 
-- `setindex!` is not implemented for some StaticArrays.jl array types
-- [oxinabox `AbstractSet` issue]('https://github.com/JuliaLang/julia/issues/34677')
+- For `AbstractArray` `setindex!` is not implemented for some StaticArrays.jl array types
+- For `AbstractSet` `empty` may or may not be defined
+<!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} -->
 
 # Interfaces.jl approach
 
-Illustration with a set interface
-
-## Define mandatory components
+Illustrated with a set interface
 
 ```{julia}
 #| echo: false
@@ -84,12 +91,6 @@ Illustration with a set interface
 global mandatory
 global optional
 using BenchmarkTools
-```
-\
-Format: `component = "label" => test_func`
-\
-\
-```{julia}
 mandatory = (;
     isempty = "defines `isempty` and testdata is not empty" => !isempty,
     eltype = "elements eltype of set `s` are subtypes of `eltype(s)`" => 
@@ -99,13 +100,6 @@ mandatory = (;
     in = "`in` is true for elements in set" => 
       s -> all(x -> in(x, s), s),
 );
-```
-
----
-
-## Define optional components
-\
-```{julia}
 optional = (;
     copy = "creates an identical object with the same values, that is not the same object" => 
         s -> (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),
@@ -129,9 +123,51 @@ Using the `@interface` macro:
 
 ```{julia}
 using Interfaces
-@interface SetInterface AbstractSet (; mandatory, optional) "Defines AbstractSet behavior";
-#          ^            ^           ^                       ^
-#          interface    supertype   test components         description
+
+components = (; mandatory, optional) 
+ 
+@interface SetInterface AbstractSet components "Defines AbstractSet behavior"
+#          ^            ^           ^          ^
+#          interface    supertype   test funcs description
+```
+
+## Define mandatory components:
+
+\
+Format: `component = "label" => test_func`
+\
+\
+```{julia}
+mandatory = (;
+    isempty = "defines `isempty` and testdata is not empty" => !isempty,
+    eltype = "elements eltype of set `s` are subtypes of `eltype(s)`" => 
+      s -> typeof(first(iterate(s))) <: eltype(s),
+    length = "set defines length and test object has length larger than zero" => 
+      s -> length(s) isa Int && length(s) > 0,
+    in = "`in` is true for elements in set" => 
+      s -> all(x -> x in s, s),
+);
+```
+
+---
+
+## Define optional components:
+\
+```{julia}
+optional = (;
+    copy = "creates an identical object with the same values, that is not the same object" => 
+        s -> (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),
+    empty = (
+        "returns an empty set able to hold elements of type U" => 
+            s -> (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),
+    ),
+    # Components can be a tuple of tests
+    intersect = (
+        "`intersect` of set with itself is itself" => s -> intersect(s, s) == s,
+        "`intersect` of set with an empty set is an empty set" => s -> intersect(s, empty(s)) == empty(s),
+    ),
+    # ...
+);
 ```
 
 ## Declare an implementation
@@ -145,14 +181,21 @@ Using the `@implements` macro:
 #           interface with options       type test data
 ```
 
-## Test an implementation
+## Test the implementation
+
+![ ](https://private-user-images.githubusercontent.com/2534009/347624472-301a895e-d626-4b50-a9fe-44725e147316.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDQ3Mi0zMDFhODk1ZS1kNjI2LTRiNTAtYTlmZS00NDcyNWUxNDczMTYucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MTA3NTA1ZjQwMmFiNTM2OWUzMTAxMTRjN2RjZjc3MzZjODk0ODJlYjEwMWVlYzRjMTRhM2ZiOGI4MzczNWM2MSZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.bt1bk5VZDVHFbwpaAEqht_VJVApbgBTvzG0uEh3OxjU)
+
 Using the `test` method:
-```{julia}
+
+```julia
 Interfaces.test(SetInterface, Set)
 ```
 
 ## Test all the implementations
-```{julia}
+
+![ ](https://private-user-images.githubusercontent.com/2534009/347624592-20d76357-2423-43bd-b25a-d96a82aa8d6d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDU5Mi0yMGQ3NjM1Ny0yNDIzLTQzYmQtYjI1YS1kOTZhODJhYThkNmQucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjFlYTA5NWU2NTdkM2EzNDk1MjI2NGM4ZTJiZGI5MjU5YmI4MmU1Nzg3ZjVjZWJmZWU3YjIyOTQ0M2Q1NGZhZCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.GqXgmx3eZ1L0bFVLuLu4MtoJQZn3QnMDsROqSE6LAUI)
+
+```julia
 Interfaces.test(SetInterface)
 ```
 
@@ -168,7 +211,6 @@ Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```{julia}
 Interfaces.implements(SetInterface{:intersect}, Set)
 ```
-\
 
 This has no runtime cost:
 ```{julia}
@@ -249,4 +291,16 @@ search: SetInterface
 - Lighter interpretation burden on the user
 - More reliable ecosystem
 
+
+# Status/Roadmap
+
+Other implementations:
+- DynamicExpressions.jl
+- DimensionalData.jl
+
+- BaseInterfaces.jl is half written
+  - But many base interfaces are not documeted!
+
 # Questions?
+
+![](https://contrib.rocks/image?repo=rafaqz/Interfaces.jl)
