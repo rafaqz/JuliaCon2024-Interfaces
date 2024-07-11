@@ -34,8 +34,7 @@ execute:
 # Motivation
 
 - Julia has no formal interfaces
-- This can lead to correctness bugs
-- People have complained about this...
+- This can lead to correctness bugs...
 
 ---
 
@@ -47,28 +46,26 @@ execute:
 \
 
 - What can we do about correctness bugs?
-- Can we simplify tested interface definitions in a package?
-- There are quite a few packages trying this from different angles
+- Can we implement interface testing in a package?
+- There are packages trying this from different angles:
   - [Seelengrab/RequiredInterfaces.jl](https://github.com/Seelengrab/RequiredInterfaces.jl)
   - [keno/InterfaceSpecs.jl](https://github.com/keno/InterfaceSpecs.jl)
   - [mrufsvold/DuckDispatch.jl](https://github.com/mrufsvold/DuckDispatch.jl)
+  - [rafaqz/Interfaces.jl](https://github.com/rafaqz/Interfaces.jl)
 - Interfaces.jl is just one possible approach
 
 ## Defining “interface” for Interfaces.jl
 
 - an interface is of a set of functions with documented contracts
-- it may be tied to an abstract type, or not (`AbstractArray` vs Tables.jl)
+- it may be tied to an abstract type, or not (think `AbstractArray` vs Tables.jl)
 - behaviour may be testable at _compile-time_ or _run-time_
-
-## Interfaces may have optional components 
-
-- For `AbstractArray`, `setindex!` is not implemented for some StaticArrays.jl types
-- For `AbstractSet`, `empty` may or may not be defined
+- interfaces may have optional components 
+  - For `AbstractArray`, `setindex!` is not implemented for some StaticArrays.jl types
 <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} -->
 
 # Interfaces.jl approach
 
-Illustrated with a simplified `AbstractSet` interface
+With a simplified `AbstractSet` example
 
 ```{julia}
 #| echo: false
@@ -263,11 +260,11 @@ search: SetInterface
 
 Other implementations:
 
-- BaseInterfaces.jl is partly written
-  - But many base interfaces are not documented!
-- DynamicExpressions.jl
-- DimensionalData.jl
-- JuliaGraphs ecosystem
+- BaseInterfaces.jl is partly written (help appreciated!)
+- Other implementations
+  - DynamicExpressions.jl
+  - DimensionalData.jl
+  - JuliaGraphs ecosystem
 
 # Case study: JuliaGraphs ecosystem
 
