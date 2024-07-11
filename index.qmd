@@ -56,11 +56,11 @@ execute:
 
 ## What do we mean by “interface” in Interfaces.jl?
 
-- an interface is of a set of functions with documented contracts
-- it may be tied to an abstract type, or not 
+- An interface is of a set of functions with documented contracts
+- It may be tied to an abstract type, or not 
   - think `AbstractArray` vs Tables.jl
-- behaviour may be testable at _compile-time_ or _run-time_
-- interfaces may have optional components 
+- Behaviour may be testable at _compile-time_ or _run-time_
+- Interfaces may have optional components 
   - For `AbstractArray`, `setindex!` is not implemented for some StaticArrays.jl types
 <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} -->
 
@@ -116,7 +116,7 @@ using Interfaces
 ## Define mandatory components:
 
 \
-`component = "label" => test_func`
+`component = "label" => function`
 \
 \
 ```{julia}
@@ -181,7 +181,7 @@ Interfaces.test(SetInterface)
 
 ![ ](https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test2.png?raw=true)
 
-## Check an implementation trait 
+## Check implementation traits
 
 Using the `implements` method:
 ```{julia}
@@ -200,6 +200,7 @@ This has no runtime cost:
 ```
 
 ## Check extended help
+
 ```julia
 help?> ?SetInterface
 search: SetInterface
