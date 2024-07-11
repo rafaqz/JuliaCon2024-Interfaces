@@ -34,6 +34,7 @@ execute:
 # Motivation
 
 - Julia has no formal interfaces
+- This can lead to correctness bugs
 - People have complained about this...
 
 ---
@@ -45,48 +46,29 @@ execute:
 \
 \
 
-- What can we do about this?
-- Can we facilitate tested interfaces in a package?
+- What can we do about correctness bugs?
+- Can we simplify tested interface definitions in a package?
+- There are quite a few packages trying this from different angles
+  - [Seelengrab/RequiredInterfaces.jl](https://github.com/Seelengrab/RequiredInterfaces.jl)
+  - [keno/InterfaceSpecs.jl](https://github.com/keno/InterfaceSpecs.jl)
+  - [mrufsvold/DuckDispatch.jl](https://github.com/mrufsvold/DuckDispatch.jl)
+- Interfaces.jl is just one possible approach
 
 ## Defining “interface” for Interfaces.jl
 
-- an interface consists of a set of functions with clear documented behaviour
-- it may or may not be tied to an abstract type (`AbstractArray` vs Tables.jl)
-- objects implenting the interace must be accepted by the interface functions
-- methods should behave as the function documentation specifies
+- an interface is of a set of functions with documented contracts
+- it may be tied to an abstract type, or not (`AbstractArray` vs Tables.jl)
+- behaviour may be testable at _compile-time_ or _run-time_
 
-## Compile-time and run-time
+## Interfaces may have optional components 
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-- Compile time: 
-  - Is a method defined?
-  - Does it accept arguments of the allowed types?
-- Run time: does the method do what the interface demands?
-
-:::
-
-::: {.column width="50%"}
-
-- Examples: 
-  - Compile-time check: `size` returns a Tuple of `Int`
-  - Run-time check: `prod(size(x)) == length(x)`
-
-:::
-
-::::
-
-## Interfaces have optional components 
-
-- For `AbstractArray` `setindex!` is not implemented for some StaticArrays.jl array types
-- For `AbstractSet` `empty` may or may not be defined
+- For `AbstractArray`, `setindex!` is not implemented for some StaticArrays.jl types
+- For `AbstractSet`, `empty` may or may not be defined
 <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} -->
 
 # Interfaces.jl approach
 
-Illustrated with a set interface
+Illustrated with a simplified `AbstractSet` interface
 
 ```{julia}
 #| echo: false
@@ -100,7 +82,7 @@ mandatory = (;
       s -> typeof(first(iterate(s))) <: eltype(s),
     length = "set defines length and test object has length larger than zero" => 
       s -> length(s) isa Int && length(s) > 0,
-    in = "`in` is true for elements in set" => 
+    in = "`in` is true for all elements in the set" => 
       s -> all(x -> in(x, s), s),
 );
 optional = (;
@@ -117,6 +99,7 @@ optional = (;
     ),
     # ...
 );
+components = (; mandatory, optional);
 ```
 
 ## Define the interface 
@@ -126,18 +109,16 @@ Using the `@interface` macro:
 
 ```{julia}
 using Interfaces
-
-components = (; mandatory, optional) 
  
 @interface SetInterface AbstractSet components "Defines AbstractSet behavior"
 #          ^            ^           ^          ^
-#          interface    supertype   test funcs description
+#          name         supertype   tests      description
 ```
 
 ## Define mandatory components:
 
 \
-Format: `component = "label" => test_func`
+`component = "label" => test_func`
 \
 \
 ```{julia}
@@ -147,7 +128,7 @@ mandatory = (;
       s -> typeof(first(iterate(s))) <: eltype(s),
     length = "set defines length and test object has length larger than zero" => 
       s -> length(s) isa Int && length(s) > 0,
-    in = "`in` is true for elements in set" => 
+    in = "`in` is true for all elements in the set" => 
       s -> all(x -> x in s, s),
 );
 ```
@@ -171,6 +152,8 @@ optional = (;
     ),
     # ...
 );
+
+components = (; mandatory, optional); 
 ```
 
 ## Declare an implementation
@@ -185,7 +168,7 @@ Using the `@implements` macro:
 ```
 
 ## Test the implementation
-
+\
 ```julia
 Interfaces.test(SetInterface, Set)
 ```
@@ -193,7 +176,7 @@ Interfaces.test(SetInterface, Set)
 ![ ](https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test1.png?raw=true)
 
 ## Test all the implementations
-
+\
 ```julia
 Interfaces.test(SetInterface)
 ```
@@ -261,7 +244,7 @@ search: SetInterface
 
     •  length: set defines length and test object has length larger than zero
 
-    •  in: in is true for elements in set
+    •  in: in is true for all elements in the set
 
   Optional keys:
   ==============
@@ -275,6 +258,16 @@ search: SetInterface
        • intersect of set with itself is itself
        • intersect of set with an empty set is an empty set
 ```
+
+# Status/Roadmap
+
+Other implementations:
+
+- BaseInterfaces.jl is partly written
+  - But many base interfaces are not documented!
+- DynamicExpressions.jl
+- DimensionalData.jl
+- JuliaGraphs ecosystem
 
 # Case study: JuliaGraphs ecosystem
 
@@ -291,16 +284,6 @@ search: SetInterface
 - Run-time check: `nv(g)` should be the length of `vertices(g)`
 - Lighter interpretation burden on the user
 - More reliable ecosystem
-
-
-# Status/Roadmap
-
-Other implementations:
-
-- DynamicExpressions.jl
-- DimensionalData.jl
-- BaseInterfaces.jl is half written
-  - But many base interfaces are not documeted!
 
 # Questions?
 
