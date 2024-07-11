@@ -405,7 +405,7 @@ Rafael Schouten
 <a href="mailto:rafaelschouten@gmail.com">rafaelschouten@gmail.com</a>
 </div>
         <p class="quarto-title-affiliation">
-            Globe Intstitute, Copenhagen University
+            Globe Institute, Copenhagen University
           </p>
         <p class="quarto-title-affiliation">
             
@@ -434,24 +434,33 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <h1>Motivation</h1>
 <ul>
 <li class="fragment">Julia has no formal interfaces</li>
-<li class="fragment">People have complained about this</li>
+<li class="fragment">People have complained about this…</li>
 </ul>
 </section>
 <section class="slide level2">
 
 <iframe src="https://yuri.is/not-julia/" style="background-color: white; width: 100%; aspect-ratio: 1.2;">
 </iframe>
+</section>
+<section class="slide level2">
+
+<p><br>
+<br>
+</p>
+<ul>
+<li class="fragment">What can we do about this?</li>
+<li class="fragment">Can we facilitate tested interfaces in a package?</li>
+</ul>
 </section></section>
 <section>
-<section id="what-is-an-interface" class="title-slide slide level1 center">
-<h1>What is an “interface”?</h1>
+<section id="defining-interface-for-interfaces.jl" class="title-slide slide level1 center">
+<h1>Defining “interface” for Interfaces.jl</h1>
 <ul>
-<li class="fragment">Objects must accepted in a specific set of methods</li>
-<li class="fragment">Methods should behave as the function documentation specifies</li>
+<li class="fragment">an interface consists of a set of functions with clear documented behaviour</li>
+<li class="fragment">it may or may not be tied to an abstract type (<code>AbstractArray</code> vs Tables.jl)</li>
+<li class="fragment">objects implenting the interace must be accepted by the interface functions</li>
+<li class="fragment">methods should behave as the function documentation specifies</li>
 </ul>
-</section>
-<section id="interfaces-have-compile-time-and-run-time-properties" class="slide level2">
-<h2>Interfaces have <em>compile-time</em> and <em>run-time</em> properties</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <ul>
@@ -475,64 +484,70 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <section id="interfaces-have-optional-components" class="slide level2">
 <h2>Interfaces have optional components</h2>
 <ul>
-<li class="fragment"><code>setindex!</code> is not implemented for some StaticArrays.jl array types</li>
-<li class="fragment"><a href="'https://github.com/JuliaLang/julia/issues/34677'">oxinabox <code>AbstractSet</code> issue</a></li>
+<li class="fragment">For <code>AbstractArray</code> <code>setindex!</code> is not implemented for some StaticArrays.jl array types</li>
+<li class="fragment">For <code>AbstractSet</code> <code>empty</code> may or may not be defined <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
 </ul>
 </section></section>
 <section>
 <section id="interfaces.jl-approach" class="title-slide slide level1 center">
 <h1>Interfaces.jl approach</h1>
-<p>Illustration with a set interface</p>
-</section>
-<section id="define-mandatory-components" class="slide level2">
-<h2>Define mandatory components</h2>
-<p><br>
-Format: <code>component = "label" =&gt; test_func</code><br>
-<br>
-</p>
-<div id="4" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a>mandatory <span class="op">=</span> (;</span>
-<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a>    isempty <span class="op">=</span> <span class="st">"defines `isempty` and testdata is not empty"</span> <span class="op">=&gt;</span> !isempty,</span>
-<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>    eltype <span class="op">=</span> <span class="st">"elements eltype of set `s` are subtypes of `eltype(s)`"</span> <span class="op">=&gt;</span> </span>
-<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">typeof</span>(<span class="fu">first</span>(<span class="fu">iterate</span>(s))) <span class="op">&lt;:</span><span class="dt"> eltype</span>(s),</span>
-<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="st">"set defines length and test object has length larger than zero"</span> <span class="op">=&gt;</span> </span>
-<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">length</span>(s) isa <span class="dt">Int</span> <span class="op">&amp;&amp;</span> <span class="fu">length</span>(s) <span class="op">&gt;</span> <span class="fl">0</span>,</span>
-<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for elements in set"</span> <span class="op">=&gt;</span> </span>
-<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">all</span>(x <span class="op">-&gt;</span> <span class="fu">in</span>(x, s), s),</span>
-<span id="cb1-9"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="define-optional-components" class="slide level2">
-<h2>Define optional components</h2>
-<p><br>
-</p>
-<div id="6" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a>optional <span class="op">=</span> (;</span>
-<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a>    copy <span class="op">=</span> <span class="st">"creates an identical object with the same values, that is not the same object"</span> <span class="op">=&gt;</span> </span>
-<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a>        s <span class="op">-&gt;</span> (s1 <span class="op">=</span> <span class="fu">copy</span>(s); s1 <span class="op">!==</span> s <span class="op">&amp;&amp;</span> s1 isa <span class="fu">typeof</span>(s) <span class="op">&amp;&amp;</span> <span class="fu">collect</span>(s) <span class="op">==</span> <span class="fu">collect</span>(s1)),</span>
-<span id="cb2-4"><a aria-hidden="true" tabindex="-1"></a>    empty <span class="op">=</span> (</span>
-<span id="cb2-5"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"returns an empty set able to hold elements of type U"</span> <span class="op">=&gt;</span> </span>
-<span id="cb2-6"><a aria-hidden="true" tabindex="-1"></a>            s <span class="op">-&gt;</span> (s1 <span class="op">=</span> <span class="bu">Base</span>.<span class="fu">empty</span>(s); <span class="fu">isempty</span>(s1) <span class="op">&amp;&amp;</span> <span class="fu">eltype</span>(s1) <span class="op">==</span> <span class="fu">eltype</span>(s)),</span>
-<span id="cb2-7"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># Components can be a tuple of tests</span></span>
-<span id="cb2-9"><a aria-hidden="true" tabindex="-1"></a>    intersect <span class="op">=</span> (</span>
-<span id="cb2-10"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with itself is itself"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, s) <span class="op">==</span> s,</span>
-<span id="cb2-11"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with an empty set is an empty set"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, <span class="fu">empty</span>(s)) <span class="op">==</span> <span class="fu">empty</span>(s),</span>
-<span id="cb2-12"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb2-13"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
-<span id="cb2-14"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p>Illustrated with a set interface</p>
 </section>
 <section id="define-the-interface" class="slide level2">
 <h2>Define the interface</h2>
 <p><br>
 <br>
 Using the <code>@interface</code> macro:</p>
+<div id="4" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Interfaces</span></span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> (; mandatory, optional) </span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> components <span class="st">"Defines AbstractSet behavior"</span></span>
+<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          ^            ^           ^          ^</span></span>
+<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          interface    supertype   test funcs description</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>Main.Notebook.SetInterface</code></pre>
+</div>
+</div>
+</section>
+<section id="define-mandatory-components" class="slide level2">
+<h2>Define mandatory components:</h2>
+<p><br>
+Format: <code>component = "label" =&gt; test_func</code><br>
+<br>
+</p>
+<div id="6" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a>mandatory <span class="op">=</span> (;</span>
+<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a>    isempty <span class="op">=</span> <span class="st">"defines `isempty` and testdata is not empty"</span> <span class="op">=&gt;</span> !isempty,</span>
+<span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a>    eltype <span class="op">=</span> <span class="st">"elements eltype of set `s` are subtypes of `eltype(s)`"</span> <span class="op">=&gt;</span> </span>
+<span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">typeof</span>(<span class="fu">first</span>(<span class="fu">iterate</span>(s))) <span class="op">&lt;:</span><span class="dt"> eltype</span>(s),</span>
+<span id="cb3-5"><a aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="st">"set defines length and test object has length larger than zero"</span> <span class="op">=&gt;</span> </span>
+<span id="cb3-6"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">length</span>(s) isa <span class="dt">Int</span> <span class="op">&amp;&amp;</span> <span class="fu">length</span>(s) <span class="op">&gt;</span> <span class="fl">0</span>,</span>
+<span id="cb3-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for elements in set"</span> <span class="op">=&gt;</span> </span>
+<span id="cb3-8"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">all</span>(x <span class="op">-&gt;</span> x <span class="kw">in</span> s, s),</span>
+<span id="cb3-9"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-optional-components" class="slide level2">
+<h2>Define optional components:</h2>
+<p><br>
+</p>
 <div id="8" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Interfaces</span></span>
-<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> (; mandatory, optional) <span class="st">"Defines AbstractSet behavior"</span>;</span>
-<span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          ^            ^           ^                       ^</span></span>
-<span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          interface    supertype   test components         description</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a>optional <span class="op">=</span> (;</span>
+<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a>    copy <span class="op">=</span> <span class="st">"creates an identical object with the same values, that is not the same object"</span> <span class="op">=&gt;</span> </span>
+<span id="cb4-3"><a aria-hidden="true" tabindex="-1"></a>        s <span class="op">-&gt;</span> (s1 <span class="op">=</span> <span class="fu">copy</span>(s); s1 <span class="op">!==</span> s <span class="op">&amp;&amp;</span> s1 isa <span class="fu">typeof</span>(s) <span class="op">&amp;&amp;</span> <span class="fu">collect</span>(s) <span class="op">==</span> <span class="fu">collect</span>(s1)),</span>
+<span id="cb4-4"><a aria-hidden="true" tabindex="-1"></a>    empty <span class="op">=</span> (</span>
+<span id="cb4-5"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"returns an empty set able to hold elements of type U"</span> <span class="op">=&gt;</span> </span>
+<span id="cb4-6"><a aria-hidden="true" tabindex="-1"></a>            s <span class="op">-&gt;</span> (s1 <span class="op">=</span> <span class="bu">Base</span>.<span class="fu">empty</span>(s); <span class="fu">isempty</span>(s1) <span class="op">&amp;&amp;</span> <span class="fu">eltype</span>(s1) <span class="op">==</span> <span class="fu">eltype</span>(s)),</span>
+<span id="cb4-7"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-8"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># Components can be a tuple of tests</span></span>
+<span id="cb4-9"><a aria-hidden="true" tabindex="-1"></a>    intersect <span class="op">=</span> (</span>
+<span id="cb4-10"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with itself is itself"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, s) <span class="op">==</span> s,</span>
+<span id="cb4-11"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with an empty set is an empty set"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, <span class="fu">empty</span>(s)) <span class="op">==</span> <span class="fu">empty</span>(s),</span>
+<span id="cb4-12"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-13"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb4-14"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="declare-an-implementation" class="slide level2">
@@ -541,87 +556,46 @@ Using the <code>@interface</code> macro:</p>
 <br>
 Using the <code>@implements</code> macro:</p>
 <div id="10" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@implements</span> SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)} <span class="dt">Set</span>  [<span class="fu">Set</span>((<span class="fl">1</span>, <span class="fl">2</span>)), <span class="fu">Set</span>((<span class="op">:</span>a, <span class="op">:</span>b))]</span>
-<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           ^                            ^    ^</span></span>
-<span id="cb4-3"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           interface with options       type test data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@implements</span> SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)} <span class="dt">Set</span>  [<span class="fu">Set</span>((<span class="fl">1</span>, <span class="fl">2</span>)), <span class="fu">Set</span>((<span class="op">:</span>a, <span class="op">:</span>b))]</span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           ^                            ^    ^</span></span>
+<span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a><span class="co">#           interface with options       type test data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="test-an-implementation" class="slide level2">
-<h2>Test an implementation</h2>
-<p>Using the <code>test</code> method:</p>
-<div id="12" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Testing SetInterface is implemented for Set
+<section id="test-the-implementation" class="slide level2">
+<h2>Test the implementation</h2>
 
-Mandatory components
-isempty: defines `isempty` and testdata is not empty [true, true]
-eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]
-length: set defines length and test object has length larger than zero [true, true]
-in: `in` is true for elements in set [true, true]
-
-Optional components
-copy: creates an identical object with the same values, that is not the same object [true, true]
-empty: (returns an empty set able to hold elements of type U [true, true])</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>true</code></pre>
-</div>
-</div>
+<img data-src="https://private-user-images.githubusercontent.com/2534009/347624472-301a895e-d626-4b50-a9fe-44725e147316.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDQ3Mi0zMDFhODk1ZS1kNjI2LTRiNTAtYTlmZS00NDcyNWUxNDczMTYucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MTA3NTA1ZjQwMmFiNTM2OWUzMTAxMTRjN2RjZjc3MzZjODk0ODJlYjEwMWVlYzRjMTRhM2ZiOGI4MzczNWM2MSZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.bt1bk5VZDVHFbwpaAEqht_VJVApbgBTvzG0uEh3OxjU" class="r-stretch"><p>Using the <code>test</code> method:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="test-all-the-implementations" class="slide level2">
 <h2>Test all the implementations</h2>
-<div id="14" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Testing SetInterface is implemented for Set
 
-Mandatory components
-isempty: defines `isempty` and testdata is not empty [true, true]
-eltype: elements eltype of set `s` are subtypes of `eltype(s)` [true, true]
-length: set defines length and test object has length larger than zero [true, true]
-in: `in` is true for elements in set [true, true]
-
-Optional components
-copy: creates an identical object with the same values, that is not the same object [true, true]
-empty: (returns an empty set able to hold elements of type U [true, true])
-
-Implementation summary:
-  Set correctly implements SetInterface: true</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>true</code></pre>
-</div>
-</div>
+<img data-src="https://private-user-images.githubusercontent.com/2534009/347624592-20d76357-2423-43bd-b25a-d96a82aa8d6d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDU5Mi0yMGQ3NjM1Ny0yNDIzLTQzYmQtYjI1YS1kOTZhODJhYThkNmQucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjFlYTA5NWU2NTdkM2EzNDk1MjI2NGM4ZTJiZGI5MjU5YmI4MmU1Nzg3ZjVjZWJmZWU3YjIyOTQ0M2Q1NGZhZCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.GqXgmx3eZ1L0bFVLuLu4MtoJQZn3QnMDsROqSE6LAUI" class="r-stretch"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="check-an-implementation-trait" class="slide level2">
 <h2>Check an implementation trait</h2>
 <p>Using the <code>implements</code> method:</p>
+<div id="12" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>true</code></pre>
+</div>
+</div>
+<div id="14" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>true</code></pre>
+</div>
+</div>
 <div id="16" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>true</code></pre>
-</div>
-</div>
-<div id="18" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb13-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>true</code></pre>
-</div>
-</div>
-<div id="20" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb15-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface{<span class="op">:</span>intersect}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface{<span class="op">:</span>intersect}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>false</code></pre>
 </div>
 </div>
-<p><br>
-</p>
 <p>This has no runtime cost:</p>
-<div id="22" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@btime</span> Interfaces.<span class="fu">implements</span>(SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="18" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@btime</span> Interfaces.<span class="fu">implements</span>(SetInterface{(<span class="op">:</span>copy,<span class="op">:</span>empty)}, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  1.552 ns (0 allocations: 0 bytes)</code></pre>
 </div>
@@ -634,59 +608,59 @@ Implementation summary:
 <h2>Check help</h2>
 <p><br>
 </p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb20-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> SetInterface</span>
-<span id="cb20-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
-<span id="cb20-3"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
-<span id="cb20-5"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
-<span id="cb20-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
-<span id="cb20-8"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
-<span id="cb20-10"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-11"><a aria-hidden="true" tabindex="-1"></a>  ──────────────────────────────────────────────────────────────────────────────────────────────────</span>
-<span id="cb20-12"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-13"><a aria-hidden="true" tabindex="-1"></a>Extended help is available with <span class="ss">`??`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> SetInterface</span>
+<span id="cb17-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
+<span id="cb17-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
+<span id="cb17-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
+<span id="cb17-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
+<span id="cb17-8"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
+<span id="cb17-10"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a aria-hidden="true" tabindex="-1"></a>  ──────────────────────────────────────────────────────────────────────────────────────────────────</span>
+<span id="cb17-12"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a aria-hidden="true" tabindex="-1"></a>Extended help is available with <span class="ss">`??`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="check-extended-help" class="slide level2">
 <h2>Check extended help</h2>
 <p><br>
 </p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb21-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> ?SetInterface</span>
-<span id="cb21-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
-<span id="cb21-3"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
-<span id="cb21-5"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
-<span id="cb21-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
-<span id="cb21-8"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
-<span id="cb21-10"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-11"><a aria-hidden="true" tabindex="-1"></a>  Extended help</span>
-<span id="cb21-12"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">≡≡≡≡≡≡≡≡≡≡≡≡≡</span></span>
-<span id="cb21-13"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a aria-hidden="true" tabindex="-1"></a>  Mandatory keys<span class="op">:</span></span>
-<span id="cb21-15"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">===============</span></span>
-<span id="cb21-16"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-17"><a aria-hidden="true" tabindex="-1"></a>    •  isempty<span class="op">:</span> defines isempty and testdata is not empty</span>
-<span id="cb21-18"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-19"><a aria-hidden="true" tabindex="-1"></a>    •  eltype<span class="op">:</span> elements eltype of set s are subtypes of <span class="fu">eltype</span>(s)</span>
-<span id="cb21-20"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-21"><a aria-hidden="true" tabindex="-1"></a>    •  length<span class="op">:</span> set defines length and test object has length larger than zero</span>
-<span id="cb21-22"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-23"><a aria-hidden="true" tabindex="-1"></a>    •  <span class="kw">in</span><span class="op">:</span> <span class="kw">in</span> is <span class="cn">true</span> <span class="cf">for</span> elements <span class="kw">in</span> set</span>
-<span id="cb21-24"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-25"><a aria-hidden="true" tabindex="-1"></a>  Optional keys<span class="op">:</span></span>
-<span id="cb21-26"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">==============</span></span>
-<span id="cb21-27"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-28"><a aria-hidden="true" tabindex="-1"></a>    •  copy<span class="op">:</span> creates an identical object with the same values, that is not the same object</span>
-<span id="cb21-29"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-30"><a aria-hidden="true" tabindex="-1"></a>    •  empty<span class="op">:</span></span>
-<span id="cb21-31"><a aria-hidden="true" tabindex="-1"></a>       • returns an empty set able to hold elements of <span class="kw">type</span> U</span>
-<span id="cb21-32"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-33"><a aria-hidden="true" tabindex="-1"></a>    •  intersect<span class="op">:</span></span>
-<span id="cb21-34"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with itself is itself</span>
-<span id="cb21-35"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with an empty set is an empty set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb18-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> ?SetInterface</span>
+<span id="cb18-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
+<span id="cb18-3"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a aria-hidden="true" tabindex="-1"></a>      SetInterface</span>
+<span id="cb18-5"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a aria-hidden="true" tabindex="-1"></a>  An Interfaces.jl Interface with mandatory components (<span class="op">:</span>isempty, <span class="op">:</span>eltype, <span class="op">:</span>length, <span class="op">:</span><span class="kw">in</span>) and</span>
+<span id="cb18-7"><a aria-hidden="true" tabindex="-1"></a>  optional components (<span class="op">:</span>copy, <span class="op">:</span>empty, <span class="op">:</span>intersect).</span>
+<span id="cb18-8"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a aria-hidden="true" tabindex="-1"></a>  Defines <span class="dt">AbstractSet</span> behavior</span>
+<span id="cb18-10"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a aria-hidden="true" tabindex="-1"></a>  Extended help</span>
+<span id="cb18-12"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">≡≡≡≡≡≡≡≡≡≡≡≡≡</span></span>
+<span id="cb18-13"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a aria-hidden="true" tabindex="-1"></a>  Mandatory keys<span class="op">:</span></span>
+<span id="cb18-15"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">===============</span></span>
+<span id="cb18-16"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a aria-hidden="true" tabindex="-1"></a>    •  isempty<span class="op">:</span> defines isempty and testdata is not empty</span>
+<span id="cb18-18"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a aria-hidden="true" tabindex="-1"></a>    •  eltype<span class="op">:</span> elements eltype of set s are subtypes of <span class="fu">eltype</span>(s)</span>
+<span id="cb18-20"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a aria-hidden="true" tabindex="-1"></a>    •  length<span class="op">:</span> set defines length and test object has length larger than zero</span>
+<span id="cb18-22"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a aria-hidden="true" tabindex="-1"></a>    •  <span class="kw">in</span><span class="op">:</span> <span class="kw">in</span> is <span class="cn">true</span> <span class="cf">for</span> elements <span class="kw">in</span> set</span>
+<span id="cb18-24"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a aria-hidden="true" tabindex="-1"></a>  Optional keys<span class="op">:</span></span>
+<span id="cb18-26"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">==============</span></span>
+<span id="cb18-27"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a aria-hidden="true" tabindex="-1"></a>    •  copy<span class="op">:</span> creates an identical object with the same values, that is not the same object</span>
+<span id="cb18-29"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-30"><a aria-hidden="true" tabindex="-1"></a>    •  empty<span class="op">:</span></span>
+<span id="cb18-31"><a aria-hidden="true" tabindex="-1"></a>       • returns an empty set able to hold elements of <span class="kw">type</span> U</span>
+<span id="cb18-32"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a aria-hidden="true" tabindex="-1"></a>    •  intersect<span class="op">:</span></span>
+<span id="cb18-34"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with itself is itself</span>
+<span id="cb18-35"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with an empty set is an empty set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section></section>
 <section>
 <section id="case-study-juliagraphs-ecosystem" class="title-slide slide level1 center">
@@ -711,10 +685,22 @@ Implementation summary:
 <li class="fragment">More reliable ecosystem</li>
 </ul>
 <aside><ol class="aside-footnotes"><li id="fn1"><p>written with Oleg Fafurin</p></li></ol></aside></section></section>
+<section id="statusroadmap" class="title-slide slide level1 center">
+<h1>Status/Roadmap</h1>
+<p>Other implementations: - DynamicExpressions.jl - DimensionalData.jl</p>
+<ul>
+<li class="fragment">BaseInterfaces.jl is half written
+<ul>
+<li class="fragment">But many base interfaces are not documeted!</li>
+</ul></li>
+</ul>
+</section>
+
 <section id="questions" class="title-slide slide level1 center">
 <h1>Questions?</h1>
 
-<div class="quarto-auto-generated-content">
+
+<img data-src="https://contrib.rocks/image?repo=rafaqz/Interfaces.jl" class="r-stretch"><div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
 </div>
