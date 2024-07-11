@@ -56,18 +56,11 @@
     "text": "Check an implementation trait\nUsing the implements method:\n\nInterfaces.implements(SetInterface, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{:intersect}, Set)\n\nfalse\n\n\nThis has no runtime cost:\n\n@btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\n  1.552 ns (0 allocations: 0 bytes)\n\n\ntrue"
   },
   {
-    "objectID": "index.html#check-help",
-    "href": "index.html#check-help",
+    "objectID": "index.html#check-extended-help-and-extended-help",
+    "href": "index.html#check-extended-help-and-extended-help",
     "title": "Interfaces.jl",
-    "section": "Check help",
-    "text": "Check help\n\n\nhelp?&gt; SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  ──────────────────────────────────────────────────────────────────────────────────────────────────\n\nExtended help is available with `??`"
-  },
-  {
-    "objectID": "index.html#check-extended-help",
-    "href": "index.html#check-extended-help",
-    "title": "Interfaces.jl",
-    "section": "Check extended help",
-    "text": "Check extended help\n\n\nhelp?&gt; ?SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  Extended help\n  ≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n  Mandatory keys:\n  ===============\n\n    •  isempty: defines isempty and testdata is not empty\n\n    •  eltype: elements eltype of set s are subtypes of eltype(s)\n\n    •  length: set defines length and test object has length larger than zero\n\n    •  in: in is true for all elements in the set\n\n  Optional keys:\n  ==============\n\n    •  copy: creates an identical object with the same values, that is not the same object\n\n    •  empty:\n       • returns an empty set able to hold elements of type U\n\n    •  intersect:\n       • intersect of set with itself is itself\n       • intersect of set with an empty set is an empty set"
+    "section": "Check extended help and extended help",
+    "text": "Check extended help and extended help\n\n\nhelp?&gt; ?SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  Extended help\n  ≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n  Mandatory keys:\n  ===============\n\n    •  isempty: defines isempty and testdata is not empty\n\n    •  eltype: elements eltype of set s are subtypes of eltype(s)\n\n    •  length: set defines length and test object has length larger than zero\n\n    •  in: in is true for all elements in the set\n\n  Optional keys:\n  ==============\n\n    •  copy: creates an identical object with the same values, that is not the same object\n\n    •  empty:\n       • returns an empty set able to hold elements of type U\n\n    •  intersect:\n       • intersect of set with itself is itself\n       • intersect of set with an empty set is an empty set"
   },
   {
     "objectID": "index.html#the-abstractgraph-interface",
