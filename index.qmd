@@ -33,8 +33,10 @@ execute:
 
 # Motivation
 
+::: {.nonincremental}
 - Julia has no formal interfaces
 - This can lead to correctness bugs...
+:::
 
 ---
 
