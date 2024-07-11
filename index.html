@@ -434,6 +434,7 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <h1>Motivation</h1>
 <ul>
 <li class="fragment">Julia has no formal interfaces</li>
+<li class="fragment">This can lead to correctness bugs</li>
 <li class="fragment">People have complained about this…</li>
 </ul>
 </section>
@@ -448,52 +449,36 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <br>
 </p>
 <ul>
-<li class="fragment">What can we do about this?</li>
-<li class="fragment">Can we facilitate tested interfaces in a package?</li>
+<li class="fragment">What can we do about correctness bugs?</li>
+<li class="fragment">Can we simplify tested interface definitions in a package?</li>
+<li class="fragment">There are quite a few packages trying this from different angles
+<ul>
+<li class="fragment"><a href="https://github.com/Seelengrab/RequiredInterfaces.jl">Seelengrab/RequiredInterfaces.jl</a></li>
+<li class="fragment"><a href="https://github.com/keno/InterfaceSpecs.jl">keno/InterfaceSpecs.jl</a></li>
+<li class="fragment"><a href="https://github.com/mrufsvold/DuckDispatch.jl">mrufsvold/DuckDispatch.jl</a></li>
+</ul></li>
+<li class="fragment">Interfaces.jl is just one possible approach</li>
 </ul>
 </section>
 <section id="defining-interface-for-interfaces.jl" class="slide level2">
 <h2>Defining “interface” for Interfaces.jl</h2>
 <ul>
-<li class="fragment">an interface consists of a set of functions with clear documented behaviour</li>
-<li class="fragment">it may or may not be tied to an abstract type (<code>AbstractArray</code> vs Tables.jl)</li>
-<li class="fragment">objects implenting the interace must be accepted by the interface functions</li>
-<li class="fragment">methods should behave as the function documentation specifies</li>
+<li class="fragment">an interface is of a set of functions with documented contracts</li>
+<li class="fragment">it may be tied to an abstract type, or not (<code>AbstractArray</code> vs Tables.jl)</li>
+<li class="fragment">behaviour may be testable at <em>compile-time</em> or <em>run-time</em></li>
 </ul>
 </section>
-<section id="compile-time-and-run-time" class="slide level2">
-<h2>Compile-time and run-time</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
+<section id="interfaces-may-have-optional-components" class="slide level2">
+<h2>Interfaces may have optional components</h2>
 <ul>
-<li class="fragment">Compile time:
-<ul>
-<li class="fragment">Is a method defined?</li>
-<li class="fragment">Does it accept arguments of the allowed types?</li>
-</ul></li>
-<li class="fragment">Run time: does the method do what the interface demands?</li>
-</ul>
-</div><div class="column" style="width:50%;">
-<ul>
-<li class="fragment">Examples:
-<ul>
-<li class="fragment">Compile-time check: <code>size</code> returns a Tuple of <code>Int</code></li>
-<li class="fragment">Run-time check: <code>prod(size(x)) == length(x)</code></li>
-</ul></li>
-</ul>
-</div></div>
-</section>
-<section id="interfaces-have-optional-components" class="slide level2">
-<h2>Interfaces have optional components</h2>
-<ul>
-<li class="fragment">For <code>AbstractArray</code> <code>setindex!</code> is not implemented for some StaticArrays.jl array types</li>
-<li class="fragment">For <code>AbstractSet</code> <code>empty</code> may or may not be defined <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
+<li class="fragment">For <code>AbstractArray</code>, <code>setindex!</code> is not implemented for some StaticArrays.jl types</li>
+<li class="fragment">For <code>AbstractSet</code>, <code>empty</code> may or may not be defined <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
 </ul>
 </section></section>
 <section>
 <section id="interfaces.jl-approach" class="title-slide slide level1 center">
 <h1>Interfaces.jl approach</h1>
-<p>Illustrated with a set interface</p>
+<p>Illustrated with a simplified <code>AbstractSet</code> interface</p>
 </section>
 <section id="define-the-interface" class="slide level2">
 <h2>Define the interface</h2>
@@ -502,12 +487,10 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 Using the <code>@interface</code> macro:</p>
 <div id="4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Interfaces</span></span>
-<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> (; mandatory, optional) </span>
-<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> components <span class="st">"Defines AbstractSet behavior"</span></span>
-<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          ^            ^           ^          ^</span></span>
-<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          interface    supertype   test funcs description</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a><span class="pp">@interface</span> SetInterface <span class="dt">AbstractSet</span> components <span class="st">"Defines AbstractSet behavior"</span></span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          ^            ^           ^          ^</span></span>
+<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a><span class="co">#          name         supertype   tests      description</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>Main.Notebook.SetInterface</code></pre>
 </div>
@@ -516,7 +499,7 @@ Using the <code>@interface</code> macro:</p>
 <section id="define-mandatory-components" class="slide level2">
 <h2>Define mandatory components:</h2>
 <p><br>
-Format: <code>component = "label" =&gt; test_func</code><br>
+<code>component = "label" =&gt; test_func</code><br>
 <br>
 </p>
 <div id="6" class="cell" data-execution_count="1">
@@ -526,7 +509,7 @@ Format: <code>component = "label" =&gt; test_func</code><br>
 <span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">typeof</span>(<span class="fu">first</span>(<span class="fu">iterate</span>(s))) <span class="op">&lt;:</span><span class="dt"> eltype</span>(s),</span>
 <span id="cb3-5"><a aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="st">"set defines length and test object has length larger than zero"</span> <span class="op">=&gt;</span> </span>
 <span id="cb3-6"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">length</span>(s) isa <span class="dt">Int</span> <span class="op">&amp;&amp;</span> <span class="fu">length</span>(s) <span class="op">&gt;</span> <span class="fl">0</span>,</span>
-<span id="cb3-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for elements in set"</span> <span class="op">=&gt;</span> </span>
+<span id="cb3-7"><a aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> <span class="op">=</span> <span class="st">"`in` is true for all elements in the set"</span> <span class="op">=&gt;</span> </span>
 <span id="cb3-8"><a aria-hidden="true" tabindex="-1"></a>      s <span class="op">-&gt;</span> <span class="fu">all</span>(x <span class="op">-&gt;</span> x <span class="kw">in</span> s, s),</span>
 <span id="cb3-9"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -549,7 +532,9 @@ Format: <code>component = "label" =&gt; test_func</code><br>
 <span id="cb4-11"><a aria-hidden="true" tabindex="-1"></a>        <span class="st">"`intersect` of set with an empty set is an empty set"</span> <span class="op">=&gt;</span> s <span class="op">-&gt;</span> <span class="fu">intersect</span>(s, <span class="fu">empty</span>(s)) <span class="op">==</span> <span class="fu">empty</span>(s),</span>
 <span id="cb4-12"><a aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb4-13"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
-<span id="cb4-14"><a aria-hidden="true" tabindex="-1"></a>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-14"><a aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-15"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> (; mandatory, optional);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="declare-an-implementation" class="slide level2">
@@ -565,11 +550,15 @@ Using the <code>@implements</code> macro:</p>
 </section>
 <section id="test-the-implementation" class="slide level2">
 <h2>Test the implementation</h2>
+<p><br>
+</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test1.png?raw=true" class="r-stretch"></section>
 <section id="test-all-the-implementations" class="slide level2">
 <h2>Test all the implementations</h2>
+<p><br>
+</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test2.png?raw=true" class="r-stretch"></section>
@@ -649,7 +638,7 @@ Using the <code>@implements</code> macro:</p>
 <span id="cb18-20"><a aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-21"><a aria-hidden="true" tabindex="-1"></a>    •  length<span class="op">:</span> set defines length and test object has length larger than zero</span>
 <span id="cb18-22"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-23"><a aria-hidden="true" tabindex="-1"></a>    •  <span class="kw">in</span><span class="op">:</span> <span class="kw">in</span> is <span class="cn">true</span> <span class="cf">for</span> elements <span class="kw">in</span> set</span>
+<span id="cb18-23"><a aria-hidden="true" tabindex="-1"></a>    •  <span class="kw">in</span><span class="op">:</span> <span class="kw">in</span> is <span class="cn">true</span> <span class="cf">for</span> all elements <span class="kw">in</span> the set</span>
 <span id="cb18-24"><a aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-25"><a aria-hidden="true" tabindex="-1"></a>  Optional keys<span class="op">:</span></span>
 <span id="cb18-26"><a aria-hidden="true" tabindex="-1"></a>  <span class="op">==============</span></span>
@@ -663,6 +652,20 @@ Using the <code>@implements</code> macro:</p>
 <span id="cb18-34"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with itself is itself</span>
 <span id="cb18-35"><a aria-hidden="true" tabindex="-1"></a>       • intersect of set with an empty set is an empty set</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section></section>
+<section id="statusroadmap" class="title-slide slide level1 center">
+<h1>Status/Roadmap</h1>
+<p>Other implementations:</p>
+<ul>
+<li class="fragment">BaseInterfaces.jl is partly written
+<ul>
+<li class="fragment">But many base interfaces are not documented!</li>
+</ul></li>
+<li class="fragment">DynamicExpressions.jl</li>
+<li class="fragment">DimensionalData.jl</li>
+<li class="fragment">JuliaGraphs ecosystem</li>
+</ul>
+</section>
+
 <section>
 <section id="case-study-juliagraphs-ecosystem" class="title-slide slide level1 center">
 <h1>Case study: JuliaGraphs ecosystem</h1>
@@ -686,19 +689,6 @@ Using the <code>@implements</code> macro:</p>
 <li class="fragment">More reliable ecosystem</li>
 </ul>
 <aside><ol class="aside-footnotes"><li id="fn1"><p>written with Oleg Fafurin</p></li></ol></aside></section></section>
-<section id="statusroadmap" class="title-slide slide level1 center">
-<h1>Status/Roadmap</h1>
-<p>Other implementations:</p>
-<ul>
-<li class="fragment">DynamicExpressions.jl</li>
-<li class="fragment">DimensionalData.jl</li>
-<li class="fragment">BaseInterfaces.jl is half written
-<ul>
-<li class="fragment">But many base interfaces are not documeted!</li>
-</ul></li>
-</ul>
-</section>
-
 <section id="questions" class="title-slide slide level1 center">
 <h1>Questions?</h1>
 

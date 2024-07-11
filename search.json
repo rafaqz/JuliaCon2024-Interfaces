@@ -4,42 +4,35 @@
     "href": "index.html#defining-interface-for-interfaces.jl",
     "title": "Interfaces.jl",
     "section": "Defining “interface” for Interfaces.jl",
-    "text": "Defining “interface” for Interfaces.jl\n\nan interface consists of a set of functions with clear documented behaviour\nit may or may not be tied to an abstract type (AbstractArray vs Tables.jl)\nobjects implenting the interace must be accepted by the interface functions\nmethods should behave as the function documentation specifies"
+    "text": "Defining “interface” for Interfaces.jl\n\nan interface is of a set of functions with documented contracts\nit may be tied to an abstract type, or not (AbstractArray vs Tables.jl)\nbehaviour may be testable at compile-time or run-time"
   },
   {
-    "objectID": "index.html#compile-time-and-run-time",
-    "href": "index.html#compile-time-and-run-time",
+    "objectID": "index.html#interfaces-may-have-optional-components",
+    "href": "index.html#interfaces-may-have-optional-components",
     "title": "Interfaces.jl",
-    "section": "Compile-time and run-time",
-    "text": "Compile-time and run-time\n\n\n\nCompile time:\n\nIs a method defined?\nDoes it accept arguments of the allowed types?\n\nRun time: does the method do what the interface demands?\n\n\n\nExamples:\n\nCompile-time check: size returns a Tuple of Int\nRun-time check: prod(size(x)) == length(x)"
-  },
-  {
-    "objectID": "index.html#interfaces-have-optional-components",
-    "href": "index.html#interfaces-have-optional-components",
-    "title": "Interfaces.jl",
-    "section": "Interfaces have optional components",
-    "text": "Interfaces have optional components\n\nFor AbstractArray setindex! is not implemented for some StaticArrays.jl array types\nFor AbstractSet empty may or may not be defined"
+    "section": "Interfaces may have optional components",
+    "text": "Interfaces may have optional components\n\nFor AbstractArray, setindex! is not implemented for some StaticArrays.jl types\nFor AbstractSet, empty may or may not be defined"
   },
   {
     "objectID": "index.html#define-the-interface",
     "href": "index.html#define-the-interface",
     "title": "Interfaces.jl",
     "section": "Define the interface",
-    "text": "Define the interface\n\n\nUsing the @interface macro:\n\nusing Interfaces\n\ncomponents = (; mandatory, optional) \n \n@interface SetInterface AbstractSet components \"Defines AbstractSet behavior\"\n#          ^            ^           ^          ^\n#          interface    supertype   test funcs description\n\nMain.Notebook.SetInterface"
+    "text": "Define the interface\n\n\nUsing the @interface macro:\n\nusing Interfaces\n \n@interface SetInterface AbstractSet components \"Defines AbstractSet behavior\"\n#          ^            ^           ^          ^\n#          name         supertype   tests      description\n\nMain.Notebook.SetInterface"
   },
   {
     "objectID": "index.html#define-mandatory-components",
     "href": "index.html#define-mandatory-components",
     "title": "Interfaces.jl",
     "section": "Define mandatory components:",
-    "text": "Define mandatory components:\n\nFormat: component = \"label\" =&gt; test_func\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for elements in set\" =&gt; \n      s -&gt; all(x -&gt; x in s, s),\n);"
+    "text": "Define mandatory components:\n\ncomponent = \"label\" =&gt; test_func\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for all elements in the set\" =&gt; \n      s -&gt; all(x -&gt; x in s, s),\n);"
   },
   {
     "objectID": "index.html#define-optional-components",
     "href": "index.html#define-optional-components",
     "title": "Interfaces.jl",
     "section": "Define optional components:",
-    "text": "Define optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    # Components can be a tuple of tests\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);"
+    "text": "Define optional components:\n\n\n\noptional = (;\n    copy = \"creates an identical object with the same values, that is not the same object\" =&gt; \n        s -&gt; (s1 = copy(s); s1 !== s && s1 isa typeof(s) && collect(s) == collect(s1)),\n    empty = (\n        \"returns an empty set able to hold elements of type U\" =&gt; \n            s -&gt; (s1 = Base.empty(s); isempty(s1) && eltype(s1) == eltype(s)),\n    ),\n    # Components can be a tuple of tests\n    intersect = (\n        \"`intersect` of set with itself is itself\" =&gt; s -&gt; intersect(s, s) == s,\n        \"`intersect` of set with an empty set is an empty set\" =&gt; s -&gt; intersect(s, empty(s)) == empty(s),\n    ),\n    # ...\n);\n\ncomponents = (; mandatory, optional);"
   },
   {
     "objectID": "index.html#declare-an-implementation",
@@ -53,14 +46,14 @@
     "href": "index.html#test-the-implementation",
     "title": "Interfaces.jl",
     "section": "Test the implementation",
-    "text": "Test the implementation\nInterfaces.test(SetInterface, Set)"
+    "text": "Test the implementation\n\n\nInterfaces.test(SetInterface, Set)"
   },
   {
     "objectID": "index.html#test-all-the-implementations",
     "href": "index.html#test-all-the-implementations",
     "title": "Interfaces.jl",
     "section": "Test all the implementations",
-    "text": "Test all the implementations\nInterfaces.test(SetInterface)"
+    "text": "Test all the implementations\n\n\nInterfaces.test(SetInterface)"
   },
   {
     "objectID": "index.html#check-an-implementation-trait",
@@ -81,7 +74,7 @@
     "href": "index.html#check-extended-help",
     "title": "Interfaces.jl",
     "section": "Check extended help",
-    "text": "Check extended help\n\n\nhelp?&gt; ?SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  Extended help\n  ≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n  Mandatory keys:\n  ===============\n\n    •  isempty: defines isempty and testdata is not empty\n\n    •  eltype: elements eltype of set s are subtypes of eltype(s)\n\n    •  length: set defines length and test object has length larger than zero\n\n    •  in: in is true for elements in set\n\n  Optional keys:\n  ==============\n\n    •  copy: creates an identical object with the same values, that is not the same object\n\n    •  empty:\n       • returns an empty set able to hold elements of type U\n\n    •  intersect:\n       • intersect of set with itself is itself\n       • intersect of set with an empty set is an empty set"
+    "text": "Check extended help\n\n\nhelp?&gt; ?SetInterface\nsearch: SetInterface\n\n      SetInterface\n\n  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and\n  optional components (:copy, :empty, :intersect).\n\n  Defines AbstractSet behavior\n\n  Extended help\n  ≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n  Mandatory keys:\n  ===============\n\n    •  isempty: defines isempty and testdata is not empty\n\n    •  eltype: elements eltype of set s are subtypes of eltype(s)\n\n    •  length: set defines length and test object has length larger than zero\n\n    •  in: in is true for all elements in the set\n\n  Optional keys:\n  ==============\n\n    •  copy: creates an identical object with the same values, that is not the same object\n\n    •  empty:\n       • returns an empty set able to hold elements of type U\n\n    •  intersect:\n       • intersect of set with itself is itself\n       • intersect of set with an empty set is an empty set"
   },
   {
     "objectID": "index.html#the-abstractgraph-interface",
