@@ -198,25 +198,7 @@ This has no runtime cost:
 @btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
 
-## Check help
-\
-```julia
-help?> SetInterface
-search: SetInterface
-
-      SetInterface
-
-  An Interfaces.jl Interface with mandatory components (:isempty, :eltype, :length, :in) and
-  optional components (:copy, :empty, :intersect).
-
-  Defines AbstractSet behavior
-
-  ──────────────────────────────────────────────────────────────────────────────────────────────────
-
-Extended help is available with `??`
-```
-
-## Check extended help
+## Check extended help and extended help
 \
 ```julia
 help?> ?SetInterface
@@ -258,10 +240,8 @@ search: SetInterface
 
 # Status/Roadmap
 
-Other implementations:
-
-- BaseInterfaces.jl is partly written (help appreciated!)
-- Other implementations
+- A BaseInterfaces.jl subpackage is partly written (help appreciated!)
+- Implementations:
   - DynamicExpressions.jl
   - DimensionalData.jl
   - JuliaGraphs ecosystem
@@ -283,5 +263,8 @@ Other implementations:
 - More reliable ecosystem
 
 # Questions?
-
+\
+\
+\
 ![](https://contrib.rocks/image?repo=rafaqz/Interfaces.jl)
+\
