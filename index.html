@@ -463,13 +463,13 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <section id="what-do-we-mean-by-interface-in-interfaces.jl" class="slide level2">
 <h2>What do we mean by “interface” in Interfaces.jl?</h2>
 <ul>
-<li class="fragment">an interface is of a set of functions with documented contracts</li>
-<li class="fragment">it may be tied to an abstract type, or not
+<li class="fragment">An interface is of a set of functions with documented contracts</li>
+<li class="fragment">It may be tied to an abstract type, or not
 <ul>
 <li class="fragment">think <code>AbstractArray</code> vs Tables.jl</li>
 </ul></li>
-<li class="fragment">behaviour may be testable at <em>compile-time</em> or <em>run-time</em></li>
-<li class="fragment">interfaces may have optional components
+<li class="fragment">Behaviour may be testable at <em>compile-time</em> or <em>run-time</em></li>
+<li class="fragment">Interfaces may have optional components
 <ul>
 <li class="fragment">For <code>AbstractArray</code>, <code>setindex!</code> is not implemented for some StaticArrays.jl types <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
 </ul></li>
@@ -499,7 +499,7 @@ Using the <code>@interface</code> macro:</p>
 <section id="define-mandatory-components" class="slide level2">
 <h2>Define mandatory components:</h2>
 <p><br>
-<code>component = "label" =&gt; test_func</code><br>
+<code>component = "label" =&gt; function</code><br>
 <br>
 </p>
 <div id="6" class="cell" data-execution_count="1">
@@ -562,8 +562,8 @@ Using the <code>@implements</code> macro:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test2.png?raw=true" class="r-stretch"></section>
-<section id="check-an-implementation-trait" class="slide level2">
-<h2>Check an implementation trait</h2>
+<section id="check-implementation-traits" class="slide level2">
+<h2>Check implementation traits</h2>
 <p>Using the <code>implements</code> method:</p>
 <div id="12" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">implements</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

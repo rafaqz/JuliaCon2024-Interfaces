@@ -4,7 +4,7 @@
     "href": "index.html#what-do-we-mean-by-interface-in-interfaces.jl",
     "title": "Interfaces.jl",
     "section": "What do we mean by “interface” in Interfaces.jl?",
-    "text": "What do we mean by “interface” in Interfaces.jl?\n\nan interface is of a set of functions with documented contracts\nit may be tied to an abstract type, or not\n\nthink AbstractArray vs Tables.jl\n\nbehaviour may be testable at compile-time or run-time\ninterfaces may have optional components\n\nFor AbstractArray, setindex! is not implemented for some StaticArrays.jl types"
+    "text": "What do we mean by “interface” in Interfaces.jl?\n\nAn interface is of a set of functions with documented contracts\nIt may be tied to an abstract type, or not\n\nthink AbstractArray vs Tables.jl\n\nBehaviour may be testable at compile-time or run-time\nInterfaces may have optional components\n\nFor AbstractArray, setindex! is not implemented for some StaticArrays.jl types"
   },
   {
     "objectID": "index.html#define-the-interface",
@@ -18,7 +18,7 @@
     "href": "index.html#define-mandatory-components",
     "title": "Interfaces.jl",
     "section": "Define mandatory components:",
-    "text": "Define mandatory components:\n\ncomponent = \"label\" =&gt; test_func\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for all elements in the set\" =&gt; \n      s -&gt; all(x -&gt; x in s, s),\n);"
+    "text": "Define mandatory components:\n\ncomponent = \"label\" =&gt; function\n\n\n\nmandatory = (;\n    isempty = \"defines `isempty` and testdata is not empty\" =&gt; !isempty,\n    eltype = \"elements eltype of set `s` are subtypes of `eltype(s)`\" =&gt; \n      s -&gt; typeof(first(iterate(s))) &lt;: eltype(s),\n    length = \"set defines length and test object has length larger than zero\" =&gt; \n      s -&gt; length(s) isa Int && length(s) &gt; 0,\n    in = \"`in` is true for all elements in the set\" =&gt; \n      s -&gt; all(x -&gt; x in s, s),\n);"
   },
   {
     "objectID": "index.html#define-optional-components",
@@ -49,11 +49,11 @@
     "text": "Test all the implementations\n\n\nInterfaces.test(SetInterface)"
   },
   {
-    "objectID": "index.html#check-an-implementation-trait",
-    "href": "index.html#check-an-implementation-trait",
+    "objectID": "index.html#check-implementation-traits",
+    "href": "index.html#check-implementation-traits",
     "title": "Interfaces.jl",
-    "section": "Check an implementation trait",
-    "text": "Check an implementation trait\nUsing the implements method:\n\nInterfaces.implements(SetInterface, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{:intersect}, Set)\n\nfalse\n\n\nThis has no runtime cost:\n\n@btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\n  1.552 ns (0 allocations: 0 bytes)\n\n\ntrue"
+    "section": "Check implementation traits",
+    "text": "Check implementation traits\nUsing the implements method:\n\nInterfaces.implements(SetInterface, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\ntrue\n\n\n\nInterfaces.implements(SetInterface{:intersect}, Set)\n\nfalse\n\n\nThis has no runtime cost:\n\n@btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)\n\n  1.552 ns (0 allocations: 0 bytes)\n\n\ntrue"
   },
   {
     "objectID": "index.html#check-extended-help",
