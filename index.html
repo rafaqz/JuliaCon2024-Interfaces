@@ -451,16 +451,18 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <li class="fragment">What can we do about this?</li>
 <li class="fragment">Can we facilitate tested interfaces in a package?</li>
 </ul>
-</section></section>
-<section>
-<section id="defining-interface-for-interfaces.jl" class="title-slide slide level1 center">
-<h1>Defining “interface” for Interfaces.jl</h1>
+</section>
+<section id="defining-interface-for-interfaces.jl" class="slide level2">
+<h2>Defining “interface” for Interfaces.jl</h2>
 <ul>
 <li class="fragment">an interface consists of a set of functions with clear documented behaviour</li>
 <li class="fragment">it may or may not be tied to an abstract type (<code>AbstractArray</code> vs Tables.jl)</li>
 <li class="fragment">objects implenting the interace must be accepted by the interface functions</li>
 <li class="fragment">methods should behave as the function documentation specifies</li>
 </ul>
+</section>
+<section id="compile-time-and-run-time" class="slide level2">
+<h2>Compile-time and run-time</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <ul>
@@ -563,15 +565,14 @@ Using the <code>@implements</code> macro:</p>
 </section>
 <section id="test-the-implementation" class="slide level2">
 <h2>Test the implementation</h2>
-
-<img data-src="https://private-user-images.githubusercontent.com/2534009/347624472-301a895e-d626-4b50-a9fe-44725e147316.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDQ3Mi0zMDFhODk1ZS1kNjI2LTRiNTAtYTlmZS00NDcyNWUxNDczMTYucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MTA3NTA1ZjQwMmFiNTM2OWUzMTAxMTRjN2RjZjc3MzZjODk0ODJlYjEwMWVlYzRjMTRhM2ZiOGI4MzczNWM2MSZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.bt1bk5VZDVHFbwpaAEqht_VJVApbgBTvzG0uEh3OxjU" class="r-stretch"><p>Using the <code>test</code> method:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface, <span class="dt">Set</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
+
+<img data-src="https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test1.png?raw=true" class="r-stretch"></section>
 <section id="test-all-the-implementations" class="slide level2">
 <h2>Test all the implementations</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="https://private-user-images.githubusercontent.com/2534009/347624592-20d76357-2423-43bd-b25a-d96a82aa8d6d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjA2NTE4NDksIm5iZiI6MTcyMDY1MTU0OSwicGF0aCI6Ii8yNTM0MDA5LzM0NzYyNDU5Mi0yMGQ3NjM1Ny0yNDIzLTQzYmQtYjI1YS1kOTZhODJhYThkNmQucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDcxMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA3MTBUMjI0NTQ5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjFlYTA5NWU2NTdkM2EzNDk1MjI2NGM4ZTJiZGI5MjU5YmI4MmU1Nzg3ZjVjZWJmZWU3YjIyOTQ0M2Q1NGZhZCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.GqXgmx3eZ1L0bFVLuLu4MtoJQZn3QnMDsROqSE6LAUI" class="r-stretch"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a aria-hidden="true" tabindex="-1"></a>Interfaces.<span class="fu">test</span>(SetInterface)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
+<img data-src="https://github.com/rafaqz/JuliaCon2024-Interfaces/blob/main/test2.png?raw=true" class="r-stretch"></section>
 <section id="check-an-implementation-trait" class="slide level2">
 <h2>Check an implementation trait</h2>
 <p>Using the <code>implements</code> method:</p>
@@ -687,8 +688,10 @@ Using the <code>@implements</code> macro:</p>
 <aside><ol class="aside-footnotes"><li id="fn1"><p>written with Oleg Fafurin</p></li></ol></aside></section></section>
 <section id="statusroadmap" class="title-slide slide level1 center">
 <h1>Status/Roadmap</h1>
-<p>Other implementations: - DynamicExpressions.jl - DimensionalData.jl</p>
+<p>Other implementations:</p>
 <ul>
+<li class="fragment">DynamicExpressions.jl</li>
+<li class="fragment">DimensionalData.jl</li>
 <li class="fragment">BaseInterfaces.jl is half written
 <ul>
 <li class="fragment">But many base interfaces are not documeted!</li>

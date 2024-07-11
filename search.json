@@ -1,5 +1,19 @@
 [
   {
+    "objectID": "index.html#defining-interface-for-interfaces.jl",
+    "href": "index.html#defining-interface-for-interfaces.jl",
+    "title": "Interfaces.jl",
+    "section": "Defining “interface” for Interfaces.jl",
+    "text": "Defining “interface” for Interfaces.jl\n\nan interface consists of a set of functions with clear documented behaviour\nit may or may not be tied to an abstract type (AbstractArray vs Tables.jl)\nobjects implenting the interace must be accepted by the interface functions\nmethods should behave as the function documentation specifies"
+  },
+  {
+    "objectID": "index.html#compile-time-and-run-time",
+    "href": "index.html#compile-time-and-run-time",
+    "title": "Interfaces.jl",
+    "section": "Compile-time and run-time",
+    "text": "Compile-time and run-time\n\n\n\nCompile time:\n\nIs a method defined?\nDoes it accept arguments of the allowed types?\n\nRun time: does the method do what the interface demands?\n\n\n\nExamples:\n\nCompile-time check: size returns a Tuple of Int\nRun-time check: prod(size(x)) == length(x)"
+  },
+  {
     "objectID": "index.html#interfaces-have-optional-components",
     "href": "index.html#interfaces-have-optional-components",
     "title": "Interfaces.jl",
@@ -39,14 +53,14 @@
     "href": "index.html#test-the-implementation",
     "title": "Interfaces.jl",
     "section": "Test the implementation",
-    "text": "Test the implementation\n\nUsing the test method:\nInterfaces.test(SetInterface, Set)"
+    "text": "Test the implementation\nInterfaces.test(SetInterface, Set)"
   },
   {
     "objectID": "index.html#test-all-the-implementations",
     "href": "index.html#test-all-the-implementations",
     "title": "Interfaces.jl",
     "section": "Test all the implementations",
-    "text": "Test all the implementations\n\nInterfaces.test(SetInterface)"
+    "text": "Test all the implementations\nInterfaces.test(SetInterface)"
   },
   {
     "objectID": "index.html#check-an-implementation-trait",
