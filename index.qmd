@@ -38,32 +38,45 @@ execute:
 ---
 
 <iframe src="https://yuri.is/not-julia/" style="background-color: white; width: 100%; aspect-ratio: 1.2;"></iframe>
---- 
 
-# What is an “interface”
+# What is an “interface”?
 
-- objects must accepted in a specific set of methods 
-- methods should behave as the function documentation specifies
+- Objects must accepted in a specific set of methods 
+- Methods should behave as the function documentation specifies
 
 ## Interfaces have *compile-time* and *run-time* properties
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
 - Compile time: 
-  - is a method defined at all?
+  - Is a method defined?
   - Does it accept arguments of the allowed types?
-- Run-time: 
-  - does the method do what the interface states it does?
-- Example: 
-  - at compile-time check `size` returns a Tuple of `Int`
-  - at run-time check `prod(size(x)) == length(x)`
+- Run time: does the method do what the interface demands?
+
+:::
+
+::: {.column width="50%"}
+
+- Examples: 
+  - Compile-time check: `size` returns a Tuple of `Int`
+  - Run-time check: `prod(size(x)) == length(x)`
+
+:::
+
+::::
 
 ## Interfaces have optional components 
 
 - `setindex!` is not implemented for some StaticArrays.jl array types
-- [oxinabox AbstractSet issue]('https://github.com/JuliaLang/julia/issues/34677')
+- [oxinabox `AbstractSet` issue]('https://github.com/JuliaLang/julia/issues/34677')
 
 # Interfaces.jl approach
 
-## Define mandatory components:
+Illustration with a set interface
+
+## Define mandatory components
 
 ```{julia}
 #| echo: false
@@ -90,7 +103,7 @@ mandatory = (;
 
 ---
 
-## Define optional components:
+## Define optional components
 \
 ```{julia}
 optional = (;
@@ -116,7 +129,7 @@ Using the `@interface` macro:
 
 ```{julia}
 using Interfaces
-@interface SetInterface AbstractSet (; mandatory, optional) "Defines AbstractSet behavior"
+@interface SetInterface AbstractSet (; mandatory, optional) "Defines AbstractSet behavior";
 #          ^            ^           ^                       ^
 #          interface    supertype   test components         description
 ```
@@ -132,7 +145,7 @@ Using the `@implements` macro:
 #           interface with options       type test data
 ```
 
-## Test the implementation
+## Test an implementation
 Using the `test` method:
 ```{julia}
 Interfaces.test(SetInterface, Set)
@@ -144,24 +157,20 @@ Interfaces.test(SetInterface)
 ```
 
 ## Check an implementation trait 
-\
+
 Using the `implements` method:
-\
 ```{julia}
 Interfaces.implements(SetInterface, Set)
 ```
-\
 ```{julia}
 Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
-\
 ```{julia}
 Interfaces.implements(SetInterface{:intersect}, Set)
 ```
----
+\
 
 This has no runtime cost:
-\
 ```{julia}
 @btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
@@ -224,10 +233,20 @@ search: SetInterface
        • intersect of set with an empty set is an empty set
 ```
 
-# Case study: Graphs ecosystem
+# Case study: JuliaGraphs ecosystem
 
-- A handful of methods to implement `AbstractGraph`
+## The `AbstractGraph` interface
+
+- A [handful of methods](https://juliagraphs.org/Graphs.jl/v1.11/ecosystem/interface/) to implement for `AbstractGraph`
 - Some mandatory (`vertices`, `edges`), some optional (`add_vertex!`, `add_edge!`)
-- Most properties of interest are not checkable at compile time: for a given graph, are accessors coherent with one another?
-- Does `has_edge(g, u, v)` return true on every element of `edges(g)`?
-- Package GraphsInterfaceChecker.jl to verify these properties for existing and new formats.
+- For a given graph, are these methods correct and coherent with one another?
+
+## An automated checker
+
+- [GraphsInterfaceChecker.jl](https://github.com/JuliaGraphs/GraphsInterfaceChecker.jl)^[written with Oleg Fafurin] relies on Interfaces.jl to check graph implementations
+- Compile-time check: `nv(g)` should be an integer
+- Run-time check: `nv(g)` should be the length of `vertices(g)`
+- Lighter interpretation burden on the user
+- More reliable ecosystem
+
+# Questions?
