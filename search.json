@@ -4,14 +4,7 @@
     "href": "index.html#defining-interface-for-interfaces.jl",
     "title": "Interfaces.jl",
     "section": "Defining “interface” for Interfaces.jl",
-    "text": "Defining “interface” for Interfaces.jl\n\nan interface is of a set of functions with documented contracts\nit may be tied to an abstract type, or not (AbstractArray vs Tables.jl)\nbehaviour may be testable at compile-time or run-time"
-  },
-  {
-    "objectID": "index.html#interfaces-may-have-optional-components",
-    "href": "index.html#interfaces-may-have-optional-components",
-    "title": "Interfaces.jl",
-    "section": "Interfaces may have optional components",
-    "text": "Interfaces may have optional components\n\nFor AbstractArray, setindex! is not implemented for some StaticArrays.jl types\nFor AbstractSet, empty may or may not be defined"
+    "text": "Defining “interface” for Interfaces.jl\n\nan interface is of a set of functions with documented contracts\nit may be tied to an abstract type, or not (think AbstractArray vs Tables.jl)\nbehaviour may be testable at compile-time or run-time\ninterfaces may have optional components\n\nFor AbstractArray, setindex! is not implemented for some StaticArrays.jl types"
   },
   {
     "objectID": "index.html#define-the-interface",

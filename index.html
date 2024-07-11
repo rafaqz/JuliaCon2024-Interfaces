@@ -434,8 +434,7 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <h1>Motivation</h1>
 <ul>
 <li class="fragment">Julia has no formal interfaces</li>
-<li class="fragment">This can lead to correctness bugs</li>
-<li class="fragment">People have complained about this…</li>
+<li class="fragment">This can lead to correctness bugs…</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -450,12 +449,13 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 </p>
 <ul>
 <li class="fragment">What can we do about correctness bugs?</li>
-<li class="fragment">Can we simplify tested interface definitions in a package?</li>
-<li class="fragment">There are quite a few packages trying this from different angles
+<li class="fragment">Can we implement interface testing in a package?</li>
+<li class="fragment">There are packages trying this from different angles:
 <ul>
 <li class="fragment"><a href="https://github.com/Seelengrab/RequiredInterfaces.jl">Seelengrab/RequiredInterfaces.jl</a></li>
 <li class="fragment"><a href="https://github.com/keno/InterfaceSpecs.jl">keno/InterfaceSpecs.jl</a></li>
 <li class="fragment"><a href="https://github.com/mrufsvold/DuckDispatch.jl">mrufsvold/DuckDispatch.jl</a></li>
+<li class="fragment"><a href="https://github.com/rafaqz/Interfaces.jl">rafaqz/Interfaces.jl</a></li>
 </ul></li>
 <li class="fragment">Interfaces.jl is just one possible approach</li>
 </ul>
@@ -464,21 +464,18 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <h2>Defining “interface” for Interfaces.jl</h2>
 <ul>
 <li class="fragment">an interface is of a set of functions with documented contracts</li>
-<li class="fragment">it may be tied to an abstract type, or not (<code>AbstractArray</code> vs Tables.jl)</li>
+<li class="fragment">it may be tied to an abstract type, or not (think <code>AbstractArray</code> vs Tables.jl)</li>
 <li class="fragment">behaviour may be testable at <em>compile-time</em> or <em>run-time</em></li>
-</ul>
-</section>
-<section id="interfaces-may-have-optional-components" class="slide level2">
-<h2>Interfaces may have optional components</h2>
+<li class="fragment">interfaces may have optional components
 <ul>
-<li class="fragment">For <code>AbstractArray</code>, <code>setindex!</code> is not implemented for some StaticArrays.jl types</li>
-<li class="fragment">For <code>AbstractSet</code>, <code>empty</code> may or may not be defined <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
+<li class="fragment">For <code>AbstractArray</code>, <code>setindex!</code> is not implemented for some StaticArrays.jl types <!-- - [oxinabox AbstractSet issue](https://github.com/JuliaLang/julia/issues/34677){target="_blank"} --></li>
+</ul></li>
 </ul>
 </section></section>
 <section>
 <section id="interfaces.jl-approach" class="title-slide slide level1 center">
 <h1>Interfaces.jl approach</h1>
-<p>Illustrated with a simplified <code>AbstractSet</code> interface</p>
+<p>With a simplified <code>AbstractSet</code> example</p>
 </section>
 <section id="define-the-interface" class="slide level2">
 <h2>Define the interface</h2>
@@ -656,13 +653,13 @@ Using the <code>@implements</code> macro:</p>
 <h1>Status/Roadmap</h1>
 <p>Other implementations:</p>
 <ul>
-<li class="fragment">BaseInterfaces.jl is partly written
+<li class="fragment">BaseInterfaces.jl is partly written (help appreciated!)</li>
+<li class="fragment">Other implementations
 <ul>
-<li class="fragment">But many base interfaces are not documented!</li>
-</ul></li>
 <li class="fragment">DynamicExpressions.jl</li>
 <li class="fragment">DimensionalData.jl</li>
 <li class="fragment">JuliaGraphs ecosystem</li>
+</ul></li>
 </ul>
 </section>
 
