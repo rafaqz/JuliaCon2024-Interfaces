@@ -460,11 +460,14 @@ Guillaume Dalle <a href="https://orcid.org/0000-0003-4866-1687" class="quarto-ti
 <li class="fragment">Interfaces.jl is just one possible approach</li>
 </ul>
 </section>
-<section id="defining-interface-for-interfaces.jl" class="slide level2">
-<h2>Defining “interface” for Interfaces.jl</h2>
+<section id="what-do-we-mean-by-interface-in-interfaces.jl" class="slide level2">
+<h2>What do we mean by “interface” in Interfaces.jl?</h2>
 <ul>
 <li class="fragment">an interface is of a set of functions with documented contracts</li>
-<li class="fragment">it may be tied to an abstract type, or not (think <code>AbstractArray</code> vs Tables.jl)</li>
+<li class="fragment">it may be tied to an abstract type, or not
+<ul>
+<li class="fragment">think <code>AbstractArray</code> vs Tables.jl</li>
+</ul></li>
 <li class="fragment">behaviour may be testable at <em>compile-time</em> or <em>run-time</em></li>
 <li class="fragment">interfaces may have optional components
 <ul>
@@ -591,10 +594,8 @@ Using the <code>@implements</code> macro:</p>
 </div>
 </div>
 </section>
-<section id="check-extended-help-and-extended-help" class="slide level2">
-<h2>Check extended help and extended help</h2>
-<p><br>
-</p>
+<section id="check-extended-help" class="slide level2">
+<h2>Check extended help</h2>
 <div class="sourceCode" id="cb17"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb17-1"><a aria-hidden="true" tabindex="-1"></a>help?<span class="op">&gt;</span> ?SetInterface</span>
 <span id="cb17-2"><a aria-hidden="true" tabindex="-1"></a>search<span class="op">:</span> SetInterface</span>
 <span id="cb17-3"><a aria-hidden="true" tabindex="-1"></a></span>
@@ -634,7 +635,7 @@ Using the <code>@implements</code> macro:</p>
 <section id="statusroadmap" class="title-slide slide level1 center">
 <h1>Status/Roadmap</h1>
 <ul>
-<li class="fragment">A BaseInterfaces.jl subpackage is partly written (help appreciated!)</li>
+<li class="fragment">BaseInterfaces.jl subpackage is partly written (help appreciated!)</li>
 <li class="fragment">Implementations:
 <ul>
 <li class="fragment">DynamicExpressions.jl</li>
