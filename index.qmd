@@ -54,10 +54,11 @@ execute:
   - [rafaqz/Interfaces.jl](https://github.com/rafaqz/Interfaces.jl)
 - Interfaces.jl is just one possible approach
 
-## Defining “interface” for Interfaces.jl
+## What do we mean by “interface” in Interfaces.jl?
 
 - an interface is of a set of functions with documented contracts
-- it may be tied to an abstract type, or not (think `AbstractArray` vs Tables.jl)
+- it may be tied to an abstract type, or not 
+  - think `AbstractArray` vs Tables.jl
 - behaviour may be testable at _compile-time_ or _run-time_
 - interfaces may have optional components 
   - For `AbstractArray`, `setindex!` is not implemented for some StaticArrays.jl types
@@ -198,8 +199,7 @@ This has no runtime cost:
 @btime Interfaces.implements(SetInterface{(:copy,:empty)}, Set)
 ```
 
-## Check extended help and extended help
-\
+## Check extended help
 ```julia
 help?> ?SetInterface
 search: SetInterface
@@ -240,7 +240,7 @@ search: SetInterface
 
 # Status/Roadmap
 
-- A BaseInterfaces.jl subpackage is partly written (help appreciated!)
+- BaseInterfaces.jl subpackage is partly written (help appreciated!)
 - Implementations:
   - DynamicExpressions.jl
   - DimensionalData.jl
